@@ -273,9 +273,9 @@ unsigned int AdaptiveSequence::represent_costs(representation_t rep) {
 
 void AdaptiveSequence::attempt_adaptation() {
 	unsigned int length = size();
-	unsigned int list_cost = represent_costs(LIST) + length;
-	unsigned int vector_cost = represent_costs(VECTOR) + length;
-	unsigned int dequeue_cost = represent_costs(DEQUEUE) + length;
+	float list_cost = (represent_costs(LIST) + length) / operations.size();
+	float vector_cost = (represent_costs(VECTOR) + length) / operations.size();
+	float dequeue_cost = (represent_costs(DEQUEUE) + length) / operations.size();
 	switch(internals.representation) {
 		case LIST:
 			if(vector_cost < list_cost || dequeue_cost < list_cost) {

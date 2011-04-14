@@ -23,10 +23,9 @@ protected:
 		std::dequeue<T>* dequeue;
 	} contents_representation_t;
 	class ContentsADT {
-	private:
+	public:
 		representation_t tag;
 		contents_representation_t contents;
-	public:
 		ContentsADT(representation_t repr) {
 			switch(repr) {
 				case LIST:
@@ -53,11 +52,54 @@ protected:
 					break;
 			}
 		}
+		complexity_class_t complexity(operation_t o,representation_t rep) {
+			switch(o) {
+				case SORT:
+					return NLOGN;
+					break;
+				case ITERATE_OVER:
+					return LINEAR;
+					break;
+				case ACCESS_ELEMENT:
+					switch(rep) {
+						case LIST:
+							return LINEAR;
+							break;
+						case VECTOR:
+							return CONSTANT;
+							break;
+						case DEQUEUE:
+							return LINEAR;
+							break;
+					}
+					break;
+				case ACCESS_FRONT:
+					return CONSTANT;
+					break;
+				case ACCESS_BACK:
+					switch(rep) {
+						case LIST:
+							return LINEAR;
+							break;
+						case VECTOR:
+							return CONSTANT;
+							break;
+						case DEQUEUE:
+							return CONSTANT;
+							break;
+					}
+					break;
+			}
+		}
 	}
-	std::list<complexity_class_t,Allocator> operations;
-	void log_operation(complexity_class_t complexity) {
-		operations.push_front(complexity);
+	std::list<operation_t,Allocator> operations;
+	void log_operation(operation_t op) {
+		operations.push_front(op);
+		attempt_adaptation();
 	}
+	unsigned int represent_costs(representation_t rep);
+	void attempt_adaptation();
+	ContentsADT internals;
 public:
 	typedef Allocator::reference reference;
 	typedef Allocator::const_reference const_reference;
@@ -88,7 +130,7 @@ public:
 
 	bool empty() const;
 	size_type size() const;
-	size_type max_size () const;
+	size_type max_size() const;
 	void resize (size_type sz, T c = T());
 	
 	reference front();
@@ -103,7 +145,6 @@ public:
 	void assign (size_type n,const T& u);
 	void push_front(const T& x);
 	void pop_front();
-	//
 	void push_back(const T& x);
 	void pop_back();
 	iterator insert(iterator position, const T& x);

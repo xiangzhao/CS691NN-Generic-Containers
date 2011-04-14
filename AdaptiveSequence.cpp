@@ -27,6 +27,7 @@ bool AdaptiveSequence::empty() const {
 			return internals.contents.dequeue->empty();
 			break;
 	}
+	log_operation(ACCESS_FRONT);
 }
 
 size_type AdaptiveSequence::size() const {
@@ -41,6 +42,7 @@ size_type AdaptiveSequence::size() const {
 			return internals.contents.dequeue->size();
 			break;
 	}
+	log_operation(ACCESS_BACK);
 }
 
 size_type AdaptiveSequence::max_size() const {
@@ -55,6 +57,7 @@ size_type AdaptiveSequence::max_size() const {
 			return internals.contents.dequeue->max_size();
 			break;
 	}
+	log_operation(ACCESS_BACK);
 }
 
 void AdaptiveSequence::resize (size_type sz, T c = T()) {
@@ -69,6 +72,7 @@ void AdaptiveSequence::resize (size_type sz, T c = T()) {
 			internals.contents.dequeue->resize(sz,c);
 			break;
 	}
+	log_operation(ITERATE_OVER);
 }
 
 reference AdaptiveSequence::front() {
@@ -83,6 +87,7 @@ reference AdaptiveSequence::front() {
 			return internals.contents.dequeue->front();
 			break;
 	}
+	log_operation(ACCESS_FRONT);
 }
 
 const_reference AdaptiveSequence::front() const {
@@ -97,6 +102,7 @@ const_reference AdaptiveSequence::front() const {
 			return internals.contents.dequeue->front();
 			break;
 	}
+	log_operation(ACCESS_FRONT);
 }
 
 const_reference AdaptiveSequence::at(size_type n) const {
@@ -111,6 +117,7 @@ const_reference AdaptiveSequence::at(size_type n) const {
 			return internals.contents.dequeue->at(n);
 			break;
 	}
+	log_operation(ACCESS_ELEMENT);
 }
 
 reference AdaptiveSequence::at(size_type n) {
@@ -125,6 +132,7 @@ reference AdaptiveSequence::at(size_type n) {
 			return internals.contents.dequeue->at(n);
 			break;
 	}
+	log_operation(ACCESS_ELEMENT);
 }
 
 void AdaptiveSequence::assign (size_type n,const T& u) {
@@ -139,6 +147,7 @@ void AdaptiveSequence::assign (size_type n,const T& u) {
 			internals.contents.dequeue->assign(n,u);
 			break;
 	}
+	log_operation(ITERATE_OVER);
 }
 
 void AdaptiveSequence::push_front (const T& x) {
@@ -153,6 +162,7 @@ void AdaptiveSequence::push_front (const T& x) {
 			internals.contents.dequeue->push_front(x);
 			break;
 	}
+	log_operation(ACCESS_FRONT);
 }
 
 void AdaptiveSequence::pop_front() {
@@ -167,6 +177,7 @@ void AdaptiveSequence::pop_front() {
 			internals.contents.dequeue->pop_front();
 			break;
 	}
+	log_operation(ACCESS_FRONT);
 }
 
 void AdaptiveSequence::push_back (const T& x) {
@@ -181,6 +192,7 @@ void AdaptiveSequence::push_back (const T& x) {
 			internals.contents.dequeue->push_back(x);
 			break;
 	}
+	log_operation(ACCESS_BACK);
 }
 
 void AdaptiveSequence::pop_back() {
@@ -195,6 +207,7 @@ void AdaptiveSequence::pop_back() {
 			internals.contents.dequeue->pop_back();
 			break;
 	}
+	log_operation(ACCESS_BACK);
 }
 
 void AdaptiveSequence::clear() {
@@ -209,6 +222,7 @@ void AdaptiveSequence::clear() {
 			internals.contents.dequeue->clear();
 			break;
 	}
+	log_operation(LENGTH);
 }
 
 void AdaptiveSequence::remove(const T& value) {
@@ -223,6 +237,7 @@ void AdaptiveSequence::remove(const T& value) {
 			internals.contents.dequeue->remove(value);
 			break;
 	}
+	log_operation(ITERATE_OVER);
 }
 
 void AdaptiveSequence::sort() {
@@ -237,6 +252,7 @@ void AdaptiveSequence::sort() {
 			internals.contents.dequeue->sort();
 			break;
 	}
+	log_operation(SORT);
 }
 
 void AdaptiveSequence::reverse() {
@@ -251,6 +267,7 @@ void AdaptiveSequence::reverse() {
 			internals.contents.dequeue->reverse();
 			break;
 	}
+	log_operation(ITERATE_OVER);
 }
 
 unsigned int AdaptiveSequence::represent_costs(representation_t rep) {

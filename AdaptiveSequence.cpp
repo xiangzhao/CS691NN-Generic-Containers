@@ -295,6 +295,7 @@ void AdaptiveSequence::attempt_adaptation() {
 					~internals;
 					internals = insides;
 				}
+				operations.clear();
 			}
 			break;
 		case VECTOR:
@@ -315,9 +316,10 @@ void AdaptiveSequence::attempt_adaptation() {
 					~internals;
 					internals = insides;
 				}
+				operations.clear();
 			}
 			break;
-		cast DEQUEUE:
+		case DEQUEUE:
 			if(list_cost < dequeue_cost || vector_cost < dequeue_cost) {
 				if(list_cost < vector_cost) {
 					ContentsADT insides(LIST);
@@ -335,6 +337,7 @@ void AdaptiveSequence::attempt_adaptation() {
 					~internals;
 					internals = insides;
 				}
+				operations.clear();
 			}
 			break;
 	}

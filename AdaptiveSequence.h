@@ -133,18 +133,22 @@ protected:
 				if (vector_cost < dequeue_cost) {
 					ContentsADT insides(VECTOR);
 					insides.contents.vector->resize(length);
-					for (int i = 0; i < length; i++)
-						insides.contents.vector->at(i)
-								= internals.contents.list->at(i);
-					~internals;
+					typename std::list<T,Allocator>::iterator iter = internals.contents.list->begin();
+					for (int i = 0; i < length; i++) {
+						insides.contents.vector->at(i) = *iter;
+						iter++;
+					}
+					//~internals;
 					internals = insides;
 				} else {
 					ContentsADT insides(DEQUEUE);
 					insides.contents.dequeue->resize(length);
-					for (int i = 0; i < length; i++)
-						insides.contents.dequeue->at(i)
-								= internals.contents.list->at(i);
-					~internals;
+					typename std::list<T,Allocator>::iterator iter = internals.contents.list->begin();
+					for (int i = 0; i < length; i++) {
+						insides.contents.dequeue->at(i) = *iter;
+						iter++;
+					}
+					//~internals;
 					internals = insides;
 				}
 				operations.clear();
@@ -155,10 +159,12 @@ protected:
 				if (list_cost < dequeue_cost) {
 					ContentsADT insides(LIST);
 					insides.contents.list->resize(length);
-					for (int i = 0; i < length; i++)
-						insides.contents.list->at(i)
-								= internals.contents.vector->at(i);
-					~internals;
+					typename std::list<T,Allocator>::iterator iter = insides.contents.list->begin();
+					for (int i = 0; i < length; i++) {
+						*iter = internals.contents.vector->at(i);
+						iter++;
+					}
+					//~internals;
 					internals = insides;
 				} else {
 					ContentsADT insides(DEQUEUE);
@@ -166,7 +172,7 @@ protected:
 					for (int i = 0; i < length; i++)
 						insides.contents.dequeue->at(i)
 								= internals.contents.vector->at(i);
-					~internals;
+					//~internals;
 					internals = insides;
 				}
 				operations.clear();
@@ -177,10 +183,12 @@ protected:
 				if (list_cost < vector_cost) {
 					ContentsADT insides(LIST);
 					insides.contents.list->resize(length);
-					for (int i = 0; i < length; i++)
-						insides.contents.list->at(i)
-								= internals.contents.dequeue->at(i);
-					~internals;
+					typename std::list<T,Allocator>::iterator iter = insides.contents.list->begin();
+					for (int i = 0; i < length; i++) {
+						*iter = internals.contents.dequeue->at(i);
+						iter++;
+					}
+					//~internals;
 					internals = insides;
 				} else {
 					ContentsADT insides(VECTOR);
@@ -188,7 +196,7 @@ protected:
 					for (int i = 0; i < length; i++)
 						insides.contents.vector->at(i)
 								= internals.contents.dequeue->at(i);
-					~internals;
+					//~internals;
 					internals = insides;
 				}
 				operations.clear();
@@ -206,8 +214,8 @@ public:
 	typedef typename Allocator::const_pointer const_pointer;
 	typedef typename Allocator::size_type size_type;
 	typedef typename Allocator::difference_type difference_type;
-	//	typedef size_t size_type;
-	//	typedef ptrdiff_t difference_type;
+	//typedef size_t size_type;
+	//typedef ptrdiff_t difference_type;
 	//Iterators
 	struct ite {
 		typename std::list<T>::iterator list_bidirectional_iterator;
@@ -360,7 +368,7 @@ public:
 			log_operation(ACCESS_FRONT);
 		}
 
-		size_type size() const {
+		size_type size() {
 			switch (internals.representation) {
 			case LIST:
 				return internals.contents.list->size();
@@ -374,7 +382,7 @@ public:
 			}
 			log_operation(ACCESS_BACK);
 		}
-		size_type max_size() const {
+		size_type max_size() {
 			switch (internals.representation) {
 			case LIST:
 				return internals.contents.list->max_size();
@@ -443,7 +451,11 @@ public:
 		const_reference at(size_type n) const {
 			switch (internals.representation) {
 			case LIST:
-				return internals.contents.list->at(n);
+				typename std::list<T,Allocator>::iterator iter = internals.contents.list->begin();
+				for(int i=0;i<n;i++)
+					iter++;
+				T& result = *iter;
+				return result;
 				break;
 			case VECTOR:
 				return internals.contents.vector->at(n);
@@ -458,7 +470,11 @@ public:
 		reference at(size_type n) {
 			switch (internals.representation) {
 			case LIST:
-				return internals.contents.list->at(n);
+				typename std::list<T,Allocator>::iterator iter = internals.contents.list->begin();
+				for(int i=0;i<n;i++)
+					iter++;
+				T& result = *iter;
+				return result;
 				break;
 			case VECTOR:
 				return internals.contents.vector->at(n);

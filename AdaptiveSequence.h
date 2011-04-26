@@ -490,10 +490,9 @@ public:
 		}
 		log_operation(ACCESS_FRONT);
 	}
-
-<<<<<<< HEAD
-		void push_front(const T& x) {
-			switch (internals.representation) {
+	
+	void push_front(const T& x) {
+		switch (internals.representation) {
 			case LIST:
 				internals.contents.list->push_front(x);
 				log_operation(ACCESS_FRONT);
@@ -510,8 +509,9 @@ public:
 				internals.contents.dequeue->push_front(x);
 				log_operation(ACCESS_FRONT);
 				break;
-			}
-=======
+		}
+	}
+	
 	reference operator[](size_type n) {
 		return at(n);
 	}

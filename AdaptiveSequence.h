@@ -507,15 +507,21 @@ public:
 			switch (internals.representation) {
 			case LIST:
 				internals.contents.list->push_front(x);
+				log_operation(ACCESS_FRONT);
 				break;
 			case VECTOR:
-				internals.contents.vector->push_front(x);
+				int size = internals.contents.vector->size();
+				internals.contents.vector->resize(size+1);
+				for(int i=0;i<size;i++)
+					internals.contents.vector->at(i+1) = internals.contents.vector->at(i);
+				internals.contents.vector->at(0) = x;
+				log_operation(ITERATE_OVER);
 				break;
 			case DEQUEUE:
 				internals.contents.dequeue->push_front(x);
+				log_operation(ACCESS_FRONT);
 				break;
 			}
-			log_operation(ACCESS_FRONT);
 		}
 
 		void pop_front() {

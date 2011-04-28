@@ -15,7 +15,7 @@ int main() {
 	ads.push_back(5);
 	ads.push_back(6);
 	ads.push_back(7);
-	AdaptiveSequence<int>::ite iterator1 = ads.begin();
+	AdaptiveSequence<int>::iterator iterator1 = ads.begin();
 	ads.push_back(8);
 	std::cout << *iterator1 << std::endl;
 
@@ -24,10 +24,14 @@ int main() {
 	//	std::vector<int>::iterator resultite = std::find(
 	//			iterator.vector_random_access_iterator,
 	//			iteratorend.vector_random_access_iterator, 6);
-	for (AdaptiveSequence<int>::ite iterator = ads.begin(); iterator
+	for (AdaptiveSequence<int>::iterator iterator = ads.begin(); iterator
 			!= ads.end(); ++iterator) {
 		std::cout << *iterator << std::endl;
 	}
+	ads.getInternals();
+	for(int i=0;i<10000;i++)
+		ads.push_front(i);
+	ads.getInternals();
 	//	std::cout << *resultite << std::endl;
 	//	std::cout << *iterator << std::endl;
 	//	ads.getInternals();

@@ -9,6 +9,6 @@
 #define ADAPTIVITY_H
 
 enum complexity_class_t { CONSTANT, LINEAR, NLOGN };
-enum operation_t { ACCESS_FRONT, ACCESS_BACK, ACCESS_ELEMENT, ITERATE_OVER, SORT };
+enum operation_t { READ_FRONT, READ_BACK, ACCESS_ELEMENT, WRITE_FRONT, WRITE_BACK, ITERATE_OVER, SORT };
 
 #endif 

@@ -27,7 +27,6 @@ int main() {
 		std::cout << *iterator << std::endl;
 	}
 	ads.getInternals();
-	ads.resize(10000);
 	for(int i=0;i<10000;i++)
 		ads.push_front(i);
 	ads.getInternals();

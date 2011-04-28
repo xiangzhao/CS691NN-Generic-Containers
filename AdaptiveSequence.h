@@ -84,16 +84,42 @@ protected:
 					break;
 				}
 				break;
-			case ACCESS_FRONT:
+			case READ_FRONT:
 				return CONSTANT;
 				break;
-			case ACCESS_BACK:
+			case WRITE_FRONT:
+				switch (rep) {
+				case LIST:
+					return CONSTANT;
+					break;
+				case VECTOR:
+					return LINEAR;
+					break;
+				case DEQUEUE:
+					return CONSTANT;
+					break;
+				}
+				break;
+			case READ_BACK:
 				switch (rep) {
 				case LIST:
 					return LINEAR;
 					break;
 				case VECTOR:
 					return CONSTANT;
+					break;
+				case DEQUEUE:
+					return CONSTANT;
+					break;
+				}
+				break;
+			case WRITE_BACK:
+				switch (rep) {
+				case LIST:
+					return LINEAR;
+					break;
+				case VECTOR:
+					return LINEAR;
 					break;
 				case DEQUEUE:
 					return CONSTANT;
@@ -129,14 +155,9 @@ protected:
 	}
 	void attempt_adaptation() {
 		unsigned int length = size();
-		float list_cost = (represent_costs(LIST) + length) / operations.size();
-		std::cout << "List cost: " << list_cost << std::endl;
-		float vector_cost = (represent_costs(VECTOR) + length)
-				/ operations.size();
-		std::cout << "Vector cost: " << vector_cost << std::endl;
-		float dequeue_cost = (represent_costs(DEQUEUE) + length)
-				/ operations.size();
-		std::cout << "Dequeue cost: " << dequeue_cost << std::endl;
+		float list_cost = (float)(represent_costs(LIST) + length) / operations.size();
+		float vector_cost = (float)(represent_costs(VECTOR) + length) / operations.size();
+		float dequeue_cost = (float)(represent_costs(DEQUEUE) + length) / operations.size();
 		switch (internals.representation) {
 		case LIST:
 			if (vector_cost < list_cost || dequeue_cost < list_cost) {
@@ -424,7 +445,7 @@ public:
 			return internals.contents.dequeue->empty();
 			break;
 		}
-		log_operation(ACCESS_FRONT);
+		log_operation(READ_FRONT);
 	}
 
 	size_type size() {
@@ -439,7 +460,8 @@ public:
 			return internals.contents.dequeue->size();
 			break;
 		}
-		//		log_operation(ACCESS_BACK);
+		//Computing the size of the sequence requires iterating over it.		
+		log_operation(ITERATE_OVER);
 	}
 	size_type max_size() {
 		switch (internals.representation) {
@@ -453,7 +475,7 @@ public:
 			return internals.contents.dequeue->max_size();
 			break;
 		}
-		log_operation(ACCESS_BACK);
+		log_operation(ITERATE_OVER);
 	}
 	void resize(size_type sz, T c = T()) {
 		switch (internals.representation) {
@@ -482,7 +504,7 @@ public:
 			return internals.contents.dequeue->front();
 			break;
 		}
-		log_operation(ACCESS_FRONT);
+		log_operation(READ_FRONT);
 	}
 
 	const_reference front() const {
@@ -497,14 +519,13 @@ public:
 			return internals.contents.dequeue->front();
 			break;
 		}
-		log_operation(ACCESS_FRONT);
+		log_operation(READ_FRONT);
 	}
 	
 	void push_front(const T& x) {
 		switch (internals.representation) {
 			case LIST:
 				internals.contents.list->push_front(x);
-				log_operation(ACCESS_FRONT);
 				break;
 			case VECTOR: {
 				int size = internals.contents.vector->size();
@@ -512,14 +533,13 @@ public:
 				for(int i=0;i<size;i++)
 					internals.contents.vector->at(i+1) = internals.contents.vector->at(i);
 				internals.contents.vector->at(0) = x;
-				log_operation(ITERATE_OVER);
 				break;
 			}
 			case DEQUEUE:
 				internals.contents.dequeue->push_front(x);
-				log_operation(ACCESS_FRONT);
 				break;
 		}
+		log_operation(WRITE_FRONT);
 	}
 	
 	reference operator[](size_type n) {
@@ -598,7 +618,7 @@ public:
 			internals.contents.dequeue->pop_front();
 			break;
 		}
-		log_operation(ACCESS_FRONT);
+		log_operation(READ_FRONT);
 	}
 
 	void push_back(const T& x) {
@@ -613,7 +633,7 @@ public:
 			internals.contents.dequeue->push_back(x);
 			break;
 		}
-		log_operation(ACCESS_BACK);
+		log_operation(WRITE_BACK);
 	}
 
 	void pop_back() {
@@ -628,7 +648,7 @@ public:
 			internals.contents.dequeue->pop_back();
 			break;
 		}
-		log_operation(ACCESS_BACK);
+		log_operation(READ_BACK);
 	}
 	//iterator insert(iterator position, const T& x);
 	//void insert(iterator position, size_type n, const T& x);
@@ -649,7 +669,7 @@ public:
 			internals.contents.dequeue->clear();
 			break;
 		}
-		log_operation(ACCESS_BACK);
+		log_operation(READ_BACK);
 	}
 
 	//void splice(iterator position, AdaptiveSequence<T>& x);

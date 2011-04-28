@@ -43,7 +43,7 @@ all: CS691NN-Generic-Containers
 CS691NN-Generic-Containers: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++  -o"CS691NN-Generic-Containers" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -g -o"CS691NN-Generic-Containers" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

@@ -15,7 +15,9 @@ int main() {
 	ads.push_back(5);
 	ads.push_back(6);
 	ads.push_back(7);
+	AdaptiveSequence<int>::ite iterator1 = ads.begin();
 	ads.push_back(8);
+	std::cout << *iterator1 << std::endl;
 
 	//	AdaptiveSequence<int>::ite iterator = ads.begin();
 	//	AdaptiveSequence<int>::ite iteratorend = ads.end();

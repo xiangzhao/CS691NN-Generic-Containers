@@ -103,8 +103,141 @@ protected:
 			}
 		}
 	};
+public:
+	struct ite;
+	typedef Allocator allocator_type;
+	typedef typename Allocator::value_type value_type;
+	typedef typename Allocator::reference reference;
+	typedef typename Allocator::const_reference const_reference;
+	typedef typename Allocator::pointer pointer;
+	typedef typename Allocator::const_pointer const_pointer;
+	typedef typename Allocator::size_type size_type;
+	typedef typename Allocator::difference_type difference_type;
+protected:
+	std::list<ite*> iteratorList;
+public:
+	//typedef size_t size_type;
+	//typedef ptrdiff_t difference_type;
+	//Iterators
+	struct ite {
+		typename std::list<T, Allocator>::iterator list_bidirectional_iterator;
+		typename std::vector<T, Allocator>::iterator
+				vector_random_access_iterator;
+		typename std::deque<T, Allocator>::iterator
+				deque_random_access_iterator;
+		int list_bidirectional_iterator_counter;
+		int vector_random_access_iterator_counter;
+		int deque_random_access_iterator_counter;
+		AdaptiveSequence* currentSequence;
+		int tag;
+		ite(AdaptiveSequence* sequence) {
+			list_bidirectional_iterator_counter = 0;
+			vector_random_access_iterator_counter = 0;
+			deque_random_access_iterator_counter = 0;
+			switch (sequence->internals.representation) {
+			case LIST:
+				tag = 1;
+				break;
+			case VECTOR:
+				tag = 2;
+				break;
+			case DEQUEUE:
+				tag = 3;
+				break;
+			}
+			sequence->iteratorList.push_back(this);
+		}
+		reference operator*() {
+			switch (tag) {
+			case 1:
+				return *list_bidirectional_iterator;
+				break;
+			case 2:
+				return *vector_random_access_iterator;
+				break;
+			case 3:
+				return *deque_random_access_iterator;
+				break;
+			}
+		}
+
+		ite& operator++() {
+			switch (tag) {
+			case 1:
+				list_bidirectional_iterator++;
+				list_bidirectional_iterator_counter++;
+				break;
+			case 2:
+				vector_random_access_iterator++;
+				vector_random_access_iterator_counter++;
+				break;
+			case 3:
+				deque_random_access_iterator++;
+				deque_random_access_iterator_counter++;
+				break;
+			}
+			return *this;
+		}
+		ite& operator--() {
+			switch (tag) {
+			case 1:
+				list_bidirectional_iterator--;
+				break;
+			case 2:
+				vector_random_access_iterator--;
+				break;
+			case 3:
+				deque_random_access_iterator--;
+				break;
+			}
+			return *this;
+
+		}
+		bool operator==(const ite& __i) {
+			switch (tag) {
+			case 1:
+				return list_bidirectional_iterator
+						== __i.list_bidirectional_iterator;
+				break;
+			case 2:
+				return vector_random_access_iterator
+						== __i.vector_random_access_iterator;
+				break;
+			case 3:
+				return deque_random_access_iterator
+						== __i.deque_random_access_iterator;
+				break;
+			}
+
+		}
+		bool operator!=(const ite& __i) {
+			switch (tag) {
+			case 1:
+				return list_bidirectional_iterator
+						!= __i.list_bidirectional_iterator;
+				break;
+			case 2:
+				return vector_random_access_iterator
+						!= __i.vector_random_access_iterator;
+				break;
+			case 3:
+				return deque_random_access_iterator
+						!= __i.deque_random_access_iterator;
+				break;
+			}
+		}
+
+	};
 protected:
 	std::list<operation_t> operations;
+	void syncIterator(ite* it);
+	void syncIterators() {
+		for (typename std::list<ite*>::iterator it = iteratorList.begin(); it
+				!= iteratorList.end(); ++it) {
+			syncIterator(*it);
+		}
+
+	}
 	void log_operation(operation_t op) {
 		operations.push_front(op);
 		attempt_adaptation();
@@ -160,6 +293,7 @@ protected:
 					//~internals;
 					internals = insides;
 				}
+				syncIterators();
 				operations.clear();
 			}
 			break;
@@ -187,6 +321,7 @@ protected:
 				}
 				operations.clear();
 			}
+			syncIterators(internals.representation);
 			break;
 		case DEQUEUE:
 			if (list_cost < dequeue_cost || vector_cost < dequeue_cost) {
@@ -216,130 +351,29 @@ protected:
 		}
 	}
 	ContentsADT internals;
+	void syncIterator(ite* it) {
+		representation_t rep = it->currentSequence->internals.representation;
+		int tag = it->tag;
+		switch ();
+
+	}
+
 public:
-	typedef Allocator allocator_type;
-	typedef typename Allocator::value_type value_type;
-	typedef typename Allocator::reference reference;
-	typedef typename Allocator::const_reference const_reference;
-	typedef typename Allocator::pointer pointer;
-	typedef typename Allocator::const_pointer const_pointer;
-	typedef typename Allocator::size_type size_type;
-	typedef typename Allocator::difference_type difference_type;
-	//typedef size_t size_type;
-	//typedef ptrdiff_t difference_type;
-	//Iterators
-	struct ite {
-		typename std::list<T>::iterator list_bidirectional_iterator;
-		typename std::vector<T>::iterator vector_random_access_iterator;
-		typename std::deque<T>::iterator deque_random_access_iterator;
-		AdaptiveSequence* currentSequence;
-		int tag;
-		ite(AdaptiveSequence* sequence) {
-			switch (sequence->internals.representation) {
-			case LIST:
-				tag = 1;
-				break;
-			case VECTOR:
-				tag = 2;
-				break;
-			case DEQUEUE:
-				tag = 3;
-				break;
-			}
+	typedef ite iterator;
 
-		}
-		reference operator*() {
-			switch (tag) {
-			case 1:
-				return *list_bidirectional_iterator;
-				break;
-			case 2:
-				return *vector_random_access_iterator;
-				break;
-			case 3:
-				return *deque_random_access_iterator;
-				break;
-			}
-		}
-
-		ite& operator++() {
-			switch (tag) {
-			case 1:
-				list_bidirectional_iterator++;
-				break;
-			case 2:
-				vector_random_access_iterator++;
-				break;
-			case 3:
-				deque_random_access_iterator++;
-				break;
-			}
-			return *this;
-		}
-		ite& operator--() {
-			switch (tag) {
-			case 1:
-				list_bidirectional_iterator--;
-				break;
-			case 2:
-				vector_random_access_iterator--;
-				break;
-			case 3:
-				deque_random_access_iterator--;
-				break;
-			}
-			return *this;
-
-		}
-		bool operator==(const ite& __i) {
-			switch (tag) {
-			case 1:
-				return list_bidirectional_iterator
-						== __i.list_bidirectional_iterator;
-				break;
-			case 2:
-				return vector_random_access_iterator
-						== __i.vector_random_access_iterator;
-				break;
-			case 3:
-				return deque_random_access_iterator
-						== __i.deque_random_access_iterator;
-				break;
-			}
-
-		}
-		bool operator!=(const ite& __i) {
-			switch (tag) {
-			case 1:
-				return list_bidirectional_iterator
-						!= __i.list_bidirectional_iterator;
-				break;
-			case 2:
-				return vector_random_access_iterator
-						!= __i.vector_random_access_iterator;
-				break;
-			case 3:
-				return deque_random_access_iterator
-						!= __i.deque_random_access_iterator;
-				break;
-			}
-		}
-
-	};
-	typedef typename std::list<T>::iterator list_bidirectional_iterator;
-	typedef typename std::list<T>::const_iterator
-			const_list_bidirectonal_iterator;
-	typedef typename std::vector<T>::iterator vector_random_access_iterator;
-	typedef typename std::vector<T>::const_iterator
-			const_vector_random_access_iterator;
-	typedef typename std::deque<T>::iterator deque_random_access_iterator;
-	typedef typename std::deque<T>::const_iterator
-			const_deque_random_access_iterator;
-	typedef std::reverse_iterator<const_vector_random_access_iterator>
-			const_reverse_iterator;
-	typedef std::reverse_iterator<vector_random_access_iterator>
-			reverse_iterator;
-
+	//	typedef typename std::list<T>::iterator list_bidirectional_iterator;
+	//	typedef typename std::list<T>::const_iterator
+	//			const_list_bidirectonal_iterator;
+	//	typedef typename std::vector<T>::iterator vector_random_access_iterator;
+	//	typedef typename std::vector<T>::const_iterator
+	//			const_vector_random_access_iterator;
+	//	typedef typename std::deque<T>::iterator deque_random_access_iterator;
+	//	typedef typename std::deque<T>::const_iterator
+	//			const_deque_random_access_iterator;
+	//	typedef std::reverse_iterator<const_vector_random_access_iterator>
+	//			const_reverse_iterator;
+	//	typedef std::reverse_iterator<vector_random_access_iterator>
+	//			reverse_iterator;
 	//typedef iterator
 	//Bidirectional iterator
 	//const_iterator	Constant bidirectional iterator
@@ -349,7 +383,7 @@ public:
 	//typedef reverse_iterator<const_iterator> const_reverse_iterator;
 
 	AdaptiveSequence() :
-		internals(VECTOR) {
+	internals(VECTOR) {
 		//		internals = ContentsADT(LIST);
 	}
 	virtual ~AdaptiveSequence() {
@@ -359,17 +393,17 @@ public:
 	ite begin() {
 		ite itebegin(this);
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			itebegin.list_bidirectional_iterator
-					= this->internals.contents.list->begin();
+			= this->internals.contents.list->begin();
 			break;
-		case VECTOR:
+			case VECTOR:
 			itebegin.vector_random_access_iterator
-					= this->internals.contents.vector->begin();
+			= this->internals.contents.vector->begin();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			itebegin.deque_random_access_iterator
-					= this->internals.contents.dequeue->begin();
+			= this->internals.contents.dequeue->begin();
 			break;
 		}
 
@@ -378,17 +412,17 @@ public:
 	ite end() {
 		ite iteend(this);
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			iteend.list_bidirectional_iterator
-					= this->internals.contents.list->end();
+			= this->internals.contents.list->end();
 			break;
-		case VECTOR:
+			case VECTOR:
 			iteend.vector_random_access_iterator
-					= this->internals.contents.vector->end();
+			= this->internals.contents.vector->end();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			iteend.deque_random_access_iterator
-					= this->internals.contents.dequeue->end();
+			= this->internals.contents.dequeue->end();
 			break;
 		}
 
@@ -405,13 +439,13 @@ public:
 
 	bool empty() const {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			return internals.contents.list->empty();
 			break;
-		case VECTOR:
+			case VECTOR:
 			return internals.contents.vector->empty();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			return internals.contents.dequeue->empty();
 			break;
 		}
@@ -420,13 +454,13 @@ public:
 
 	size_type size() {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			return internals.contents.list->size();
 			break;
-		case VECTOR:
+			case VECTOR:
 			return internals.contents.vector->size();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			return internals.contents.dequeue->size();
 			break;
 		}
@@ -434,13 +468,13 @@ public:
 	}
 	size_type max_size() {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			return internals.contents.list->max_size();
 			break;
-		case VECTOR:
+			case VECTOR:
 			return internals.contents.vector->max_size();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			return internals.contents.dequeue->max_size();
 			break;
 		}
@@ -448,13 +482,13 @@ public:
 	}
 	void resize(size_type sz, T c = T()) {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			internals.contents.list->resize(sz, c);
 			break;
-		case VECTOR:
+			case VECTOR:
 			internals.contents.vector->resize(sz, c);
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			internals.contents.dequeue->resize(sz, c);
 			break;
 		}
@@ -463,13 +497,13 @@ public:
 
 	reference front() {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			return internals.contents.list->front();
 			break;
-		case VECTOR:
+			case VECTOR:
 			return internals.contents.vector->front();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			return internals.contents.dequeue->front();
 			break;
 		}
@@ -478,13 +512,13 @@ public:
 
 	const_reference front() const {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			return internals.contents.list->front();
 			break;
-		case VECTOR:
+			case VECTOR:
 			return internals.contents.vector->front();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			return internals.contents.dequeue->front();
 			break;
 		}
@@ -500,18 +534,18 @@ public:
 
 	const_reference at(size_type n) const {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			typename std::list<T, Allocator>::iterator iter =
-					internals.contents.list->begin();
+			internals.contents.list->begin();
 			for (int i = 0; i < n; i++)
-				iter++;
+			iter++;
 			T& result = *iter;
 			return result;
 			break;
-		case VECTOR:
+			case VECTOR:
 			return internals.contents.vector->at(n);
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			return internals.contents.dequeue->at(n);
 			break;
 		}
@@ -520,18 +554,18 @@ public:
 
 	reference at(size_type n) {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			typename std::list<T, Allocator>::iterator iter =
-					internals.contents.list->begin();
+			internals.contents.list->begin();
 			for (int i = 0; i < n; i++)
-				iter++;
+			iter++;
 			T& result = *iter;
 			return result;
 			break;
-		case VECTOR:
+			case VECTOR:
 			return internals.contents.vector->at(n);
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			return internals.contents.dequeue->at(n);
 			break;
 		}
@@ -542,13 +576,13 @@ public:
 			InputIterator last);
 	void assign(size_type n, const T& u) {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			internals.contents.list->assign(n, u);
 			break;
-		case VECTOR:
+			case VECTOR:
 			internals.contents.vector->assign(n, u);
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			internals.contents.dequeue->assign(n, u);
 			break;
 		}
@@ -557,13 +591,13 @@ public:
 
 	void push_front(const T& x) {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			internals.contents.list->push_front(x);
 			break;
-		case VECTOR:
+			case VECTOR:
 			internals.contents.vector->push_front(x);
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			internals.contents.dequeue->push_front(x);
 			break;
 		}
@@ -572,13 +606,13 @@ public:
 
 	void pop_front() {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			internals.contents.list->pop_front();
 			break;
-		case VECTOR:
+			case VECTOR:
 			internals.contents.vector->pop_front();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			internals.contents.dequeue->pop_front();
 			break;
 		}
@@ -587,13 +621,13 @@ public:
 
 	void push_back(const T& x) {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			internals.contents.list->push_back(x);
 			break;
-		case VECTOR:
+			case VECTOR:
 			internals.contents.vector->push_back(x);
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			internals.contents.dequeue->push_back(x);
 			break;
 		}
@@ -602,13 +636,13 @@ public:
 
 	void pop_back() {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			internals.contents.list->pop_back();
 			break;
-		case VECTOR:
+			case VECTOR:
 			internals.contents.vector->pop_back();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			internals.contents.dequeue->pop_back();
 			break;
 		}
@@ -623,13 +657,13 @@ public:
 	void swap(AdaptiveSequence<T>& seq);
 	void clear() {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			internals.contents.list->clear();
 			break;
-		case VECTOR:
+			case VECTOR:
 			internals.contents.vector->clear();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			internals.contents.dequeue->clear();
 			break;
 		}
@@ -642,13 +676,13 @@ public:
 	//		iterator last);
 	void remove(const T& value) {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			internals.contents.list->remove(value);
 			break;
-		case VECTOR:
+			case VECTOR:
 			internals.contents.vector->remove(value);
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			internals.contents.dequeue->remove(value);
 			break;
 		}
@@ -666,13 +700,13 @@ public:
 
 	void sort() {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			internals.contents.list->sort();
 			break;
-		case VECTOR:
+			case VECTOR:
 			internals.contents.vector->sort();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			internals.contents.dequeue->sort();
 			break;
 		}
@@ -682,13 +716,13 @@ public:
 
 	void reverse() {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			internals.contents.list->reverse();
 			break;
-		case VECTOR:
+			case VECTOR:
 			internals.contents.vector->reverse();
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			internals.contents.dequeue->reverse();
 			break;
 		}
@@ -696,13 +730,13 @@ public:
 	}
 	void getInternals() {
 		switch (internals.representation) {
-		case LIST:
+			case LIST:
 			std::cout << "LIST" << std::endl;
 			break;
-		case VECTOR:
+			case VECTOR:
 			std::cout << "VECTOR" << std::endl;
 			break;
-		case DEQUEUE:
+			case DEQUEUE:
 			std::cout << "DEQUEUE" << std::endl;
 			break;
 		}

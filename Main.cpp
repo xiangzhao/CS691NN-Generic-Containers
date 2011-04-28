@@ -22,10 +22,15 @@ int main() {
 	//	std::vector<int>::iterator resultite = std::find(
 	//			iterator.vector_random_access_iterator,
 	//			iteratorend.vector_random_access_iterator, 6);
-	for (AdaptiveSequence<int>::ite iterator = ads.begin(); iterator
+	for (AdaptiveSequence<int>::iterator iterator = ads.begin(); iterator
 			!= ads.end(); ++iterator) {
 		std::cout << *iterator << std::endl;
 	}
+	ads.getInternals();
+	ads.resize(10000);
+	for(int i=0;i<10000;i++)
+		ads.push_front(i);
+	ads.getInternals();
 	//	std::cout << *resultite << std::endl;
 	//	std::cout << *iterator << std::endl;
 	//	ads.getInternals();

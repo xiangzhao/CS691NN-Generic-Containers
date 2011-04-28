@@ -130,15 +130,19 @@ protected:
 	void attempt_adaptation() {
 		unsigned int length = size();
 		float list_cost = (represent_costs(LIST) + length) / operations.size();
+		std::cout << "List cost: " << list_cost << std::endl;
 		float vector_cost = (represent_costs(VECTOR) + length)
 				/ operations.size();
+		std::cout << "Vector cost: " << vector_cost << std::endl;
 		float dequeue_cost = (represent_costs(DEQUEUE) + length)
 				/ operations.size();
+		std::cout << "Dequeue cost: " << dequeue_cost << std::endl;
 		switch (internals.representation) {
 		case LIST:
 			if (vector_cost < list_cost || dequeue_cost < list_cost) {
 				if (vector_cost < dequeue_cost) {
 					ContentsADT insides(VECTOR);
+					std::cout << "ADAPT VECTOR" << std::endl;
 					insides.contents.vector->resize(length);
 					typename std::list<T, Allocator>::iterator iter =
 							internals.contents.list->begin();
@@ -150,6 +154,7 @@ protected:
 					internals = insides;
 				} else {
 					ContentsADT insides(DEQUEUE);
+					std::cout << "ADAPT DEQUEUE" << std::endl;
 					insides.contents.dequeue->resize(length);
 					typename std::list<T, Allocator>::iterator iter =
 							internals.contents.list->begin();
@@ -167,6 +172,7 @@ protected:
 			if (list_cost < vector_cost || dequeue_cost < vector_cost) {
 				if (list_cost < dequeue_cost) {
 					ContentsADT insides(LIST);
+					std::cout << "ADAPT LIST" << std::endl;
 					insides.contents.list->resize(length);
 					typename std::list<T, Allocator>::iterator iter =
 							insides.contents.list->begin();
@@ -178,6 +184,7 @@ protected:
 					internals = insides;
 				} else {
 					ContentsADT insides(DEQUEUE);
+					std::cout << "ADAPT DEQUEUE" << std::endl;
 					insides.contents.dequeue->resize(length);
 					for (int i = 0; i < length; i++)
 						insides.contents.dequeue->at(i)
@@ -192,6 +199,7 @@ protected:
 			if (list_cost < dequeue_cost || vector_cost < dequeue_cost) {
 				if (list_cost < vector_cost) {
 					ContentsADT insides(LIST);
+					std::cout << "ADAPT LIST" << std::endl;
 					insides.contents.list->resize(length);
 					typename std::list<T, Allocator>::iterator iter =
 							insides.contents.list->begin();
@@ -203,6 +211,7 @@ protected:
 					internals = insides;
 				} else {
 					ContentsADT insides(VECTOR);
+					std::cout << "ADAPT VECTOR" << std::endl;
 					insides.contents.vector->resize(length);
 					for (int i = 0; i < length; i++)
 						insides.contents.vector->at(i)
@@ -497,7 +506,7 @@ public:
 				internals.contents.list->push_front(x);
 				log_operation(ACCESS_FRONT);
 				break;
-			case VECTOR:
+			case VECTOR: {
 				int size = internals.contents.vector->size();
 				internals.contents.vector->resize(size+1);
 				for(int i=0;i<size;i++)
@@ -505,6 +514,7 @@ public:
 				internals.contents.vector->at(0) = x;
 				log_operation(ITERATE_OVER);
 				break;
+			}
 			case DEQUEUE:
 				internals.contents.dequeue->push_front(x);
 				log_operation(ACCESS_FRONT);

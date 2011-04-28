@@ -228,13 +228,13 @@ public:
 	//typedef size_t size_type;
 	//typedef ptrdiff_t difference_type;
 	//Iterators
-	struct ite {
+	struct iterator {
 		typename std::list<T>::iterator list_bidirectional_iterator;
 		typename std::vector<T>::iterator vector_random_access_iterator;
 		typename std::deque<T>::iterator deque_random_access_iterator;
 		AdaptiveSequence* currentSequence;
 		int tag;
-		ite(AdaptiveSequence* sequence) {
+		iterator(AdaptiveSequence* sequence) {
 			switch (sequence->internals.representation) {
 			case LIST:
 				tag = 1;
@@ -262,7 +262,7 @@ public:
 			}
 		}
 
-		ite& operator++() {
+		iterator& operator++() {
 			switch (tag) {
 			case 1:
 				list_bidirectional_iterator++;
@@ -276,7 +276,7 @@ public:
 			}
 			return *this;
 		}
-		ite& operator--() {
+		iterator& operator--() {
 			switch (tag) {
 			case 1:
 				list_bidirectional_iterator--;
@@ -291,7 +291,7 @@ public:
 			return *this;
 
 		}
-		bool operator==(const ite& __i) {
+		bool operator==(const iterator& __i) {
 			switch (tag) {
 			case 1:
 				return list_bidirectional_iterator
@@ -308,7 +308,7 @@ public:
 			}
 
 		}
-		bool operator!=(const ite& __i) {
+		bool operator!=(const iterator& __i) {
 			switch (tag) {
 			case 1:
 				return list_bidirectional_iterator
@@ -356,8 +356,8 @@ public:
 		//		~internals;
 	}
 
-	ite begin() {
-		ite itebegin(this);
+	iterator begin() {
+		iterator itebegin(this);
 		switch (internals.representation) {
 		case LIST:
 			itebegin.list_bidirectional_iterator
@@ -375,8 +375,8 @@ public:
 
 		return itebegin;
 	}
-	ite end() {
-		ite iteend(this);
+	iterator end() {
+		iterator iteend(this);
 		switch (internals.representation) {
 		case LIST:
 			iteend.list_bidirectional_iterator
@@ -535,7 +535,6 @@ public:
 		case DEQUEUE:
 			return internals.contents.dequeue->at(n);
 			break;
->>>>>>> 0f05e296f30e3e783ce8e21c5912216f0bc6cac0
 		}
 		log_operation(ACCESS_ELEMENT);
 	}
@@ -575,21 +574,6 @@ public:
 			break;
 		}
 		log_operation(ITERATE_OVER);
-	}
-
-	void push_front(const T& x) {
-		switch (internals.representation) {
-		case LIST:
-			internals.contents.list->push_front(x);
-			break;
-		case VECTOR:
-			internals.contents.vector->push_front(x);
-			break;
-		case DEQUEUE:
-			internals.contents.dequeue->push_front(x);
-			break;
-		}
-		log_operation(ACCESS_FRONT);
 	}
 
 	void pop_front() {

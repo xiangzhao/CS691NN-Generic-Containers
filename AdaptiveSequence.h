@@ -20,9 +20,9 @@
 template<typename T, class Allocator = std::allocator<T> > class AdaptiveSequence {
 protected:
 	enum representation_t {
-		LIST, VECTOR, DEQUEUE
+		LIST = 1, VECTOR = 2, DEQUEUE = 3
 	};
-	typedef union {
+	typedef struct {
 		std::list<T>* list;
 		std::vector<T>* vector;
 		std::deque<T>* dequeue;
@@ -48,17 +48,19 @@ protected:
 			}
 		}
 		~ContentsADT() {
-			switch (representation) {
-			case LIST:
-				delete contents.list;
-				break;
-			case VECTOR:
-				delete contents.vector;
-				break;
-			case DEQUEUE:
-				delete contents.dequeue;
-				break;
-			}
+			//Commented to solve double free error
+			//
+			//			switch (representation) {
+			//			case LIST:
+			//				delete contents.list;
+			//				break;
+			//			case VECTOR:
+			//				delete contents.vector;
+			//				break;
+			//			case DEQUEUE:
+			//				delete contents.dequeue;
+			//				break;
+			//			}
 		}
 		complexity_class_t complexity(operation_t o, representation_t rep) {
 			switch (o) {
@@ -157,33 +159,35 @@ public:
 		int vector_random_access_iterator_counter;
 		int deque_random_access_iterator_counter;
 		AdaptiveSequence* currentSequence;
-		int tag;
+		representation_t tag;
 		iterator(AdaptiveSequence* sequence) {
 			list_bidirectional_iterator_counter = 0;
 			vector_random_access_iterator_counter = 0;
 			deque_random_access_iterator_counter = 0;
-			switch (sequence->internals.representation) {
-			case LIST:
-				tag = 1;
-				break;
-			case VECTOR:
-				tag = 2;
-				break;
-			case DEQUEUE:
-				tag = 3;
-				break;
-			}
+			tag = sequence->internals.representation;
+			//			currentSequence = sequence;
+			//			switch (sequence->internals.representation) {
+			//			case LIST:
+			//				tag = 1;
+			//				break;
+			//			case VECTOR:
+			//				tag = 2;
+			//				break;
+			//			case DEQUEUE:
+			//				tag = 3;
+			//				break;
+			//			}
 			sequence->iteratorList.push_back(this);
 		}
 		reference operator*() {
 			switch (tag) {
-			case 1:
+			case LIST:
 				return *list_bidirectional_iterator;
 				break;
-			case 2:
+			case VECTOR:
 				return *vector_random_access_iterator;
 				break;
-			case 3:
+			case DEQUEUE:
 				return *deque_random_access_iterator;
 				break;
 			}
@@ -191,47 +195,79 @@ public:
 
 		iterator& operator++() {
 			switch (tag) {
-			case 1:
-				list_bidirectional_iterator++;
+			case LIST:
+				++list_bidirectional_iterator;
 				list_bidirectional_iterator_counter++;
 				break;
-			case 2:
-				vector_random_access_iterator++;
-				vector_random_access_iterator_counter++;
+			case VECTOR:
+				++vector_random_access_iterator;
+				vector_random_access_iterator_counter;
 				break;
-			case 3:
-				deque_random_access_iterator++;
+			case DEQUEUE:
+				++deque_random_access_iterator;
 				deque_random_access_iterator_counter++;
 				break;
 			}
 			return *this;
 		}
+		// It should be a new iterator
+		iterator operator++(int) {
+			switch (tag) {
+			case LIST:
+				list_bidirectional_iterator++;
+				list_bidirectional_iterator_counter++;
+				break;
+			case VECTOR:
+				vector_random_access_iterator++;
+				vector_random_access_iterator_counter++;
+				break;
+			case DEQUEUE:
+				deque_random_access_iterator++;
+				deque_random_access_iterator_counter++;
+				break;
+			}
+			return this;
+		}
 		iterator& operator--() {
 			switch (tag) {
-			case 1:
-				list_bidirectional_iterator--;
+			case LIST:
+				--list_bidirectional_iterator;
 				break;
-			case 2:
-				vector_random_access_iterator--;
+			case VECTOR:
+				--vector_random_access_iterator;
 				break;
-			case 3:
-				deque_random_access_iterator--;
+			case DEQUEUE:
+				--deque_random_access_iterator;
 				break;
 			}
 			return *this;
-
 		}
+		iterator operator--(int) {
+			switch (tag) {
+			case LIST:
+				list_bidirectional_iterator--;
+				break;
+			case VECTOR:
+				vector_random_access_iterator--;
+				break;
+			case DEQUEUE:
+				deque_random_access_iterator--;
+				break;
+			}
+			return this;
+		}
+
 		bool operator==(const iterator& __i) {
 			switch (tag) {
-			case 1:
+			case LIST:
 				return list_bidirectional_iterator
 						== __i.list_bidirectional_iterator;
 				break;
-			case 2:
+			case VECTOR:
 				return vector_random_access_iterator
 						== __i.vector_random_access_iterator;
 				break;
-			case 3:
+			case DEQUEUE:
 				return deque_random_access_iterator
 						== __i.deque_random_access_iterator;
 				break;
@@ -240,28 +276,90 @@ public:
 		}
 		bool operator!=(const iterator& __i) {
 			switch (tag) {
-			case 1:
+			case LIST:
 				return list_bidirectional_iterator
 						!= __i.list_bidirectional_iterator;
 				break;
-			case 2:
+			case VECTOR:
 				return vector_random_access_iterator
 						!= __i.vector_random_access_iterator;
 				break;
-			case 3:
+			case DEQUEUE:
 				return deque_random_access_iterator
 						!= __i.deque_random_access_iterator;
 				break;
 			}
 		}
+		iterator& operator+=(const difference_type& __n) {
+			switch (tag) {
+			case LIST:
+				for (int k = 0; k < __n; k++)
+					list_bidirectional_iterator++;
+				list_bidirectional_iterator_counter += __n;
+				break;
+			case VECTOR:
+				vector_random_access_iterator += __n;
+				vector_random_access_iterator_counter += __n;
+				break;
+			case DEQUEUE:
+				deque_random_access_iterator += __n;
+				deque_random_access_iterator_counter += __n;
+				break;
+			}
+			return *this;
+		}
+		iterator& operator-=(const difference_type& __n) {
+			switch (tag) {
+			case LIST:
+				for (int k = 0; k < __n; k++)
+					--list_bidirectional_iterator;
+				list_bidirectional_iterator_counter -= __n;
+				break;
+			case VECTOR:
+				vector_random_access_iterator -= __n;
+				vector_random_access_iterator_counter -= __n;
+				break;
+			case DEQUEUE:
+				deque_random_access_iterator -= __n;
+				deque_random_access_iterator_counter -= __n;
+				break;
+			}
+			return *this;
+		}
 
 	};
 	std::list<operation_t> operations;
 	//<<<<<<< HEAD
+
 	void syncIterator(iterator* it) {
-		std::cout << "sync iterator" << std::endl;
+		std::cout << "sync iterator from " << it->tag << " to "
+				<< it->currentSequence->internals.representation << std::endl;
 		representation_t rep = it->currentSequence->internals.representation;
-		int tag = it->tag;
+		switch (rep) {
+		case LIST:
+			it->tag = LIST;
+			it->list_bidirectional_iterator
+					= it->currentSequence->internals.contents.list->begin();
+		case VECTOR:
+			it->tag = VECTOR;
+			it->vector_random_access_iterator
+					= it->currentSequence->internals.contents.vector->begin();
+		case DEQUEUE:
+			it->tag = DEQUEUE;
+			it->deque_random_access_iterator
+					= it->currentSequence->internals.contents.dequeue->begin();
+		}
+		switch (it->tag) {
+		case LIST:
+			it += it->list_bidirectional_iterator_counter;
+			it->list_bidirectional_iterator_counter = 0;
+		case VECTOR:
+			it += it->vector_random_access_iterator_counter;
+			it->vector_random_access_iterator_counter = 0;
+		case DEQUEUE:
+			it += it->deque_random_access_iterator;
+			it->deque_random_access_iterator_counter = 0;
+		}
 	}
 	//=======
 	//	void syncIterator(iterator* it);
@@ -297,7 +395,6 @@ protected:
 		return result;
 	}
 	void attempt_adaptation() {
-		syncIterators();
 		unsigned int length = size();
 		float list_cost = (float) (represent_costs(LIST) + length)
 				/ operations.size();
@@ -333,7 +430,7 @@ protected:
 					//~internals;
 					internals = insides;
 				}
-				syncIterators();
+				//				syncIterators();
 				operations.clear();
 			}
 			break;
@@ -361,9 +458,9 @@ protected:
 					//~internals;
 					internals = insides;
 				}
+				//				syncIterators();
 				operations.clear();
 			}
-			//			syncIterators(internals.representation);
 			break;
 		case DEQUEUE:
 			if (list_cost < dequeue_cost || vector_cost < dequeue_cost) {
@@ -629,7 +726,7 @@ public:
 			return internals.contents.dequeue->size();
 			break;
 		}
-		//Computing the size of the sequence requires iterating over it.		
+		//Computing the size of the sequence requires iterating over it.
 		log_operation(ITERATE_OVER);
 	}
 	size_type max_size() {

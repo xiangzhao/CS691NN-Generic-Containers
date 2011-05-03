@@ -11,11 +11,11 @@ int main() {
 	//	char* pch = "Hello";
 	//	std::cout << *(pch + 1) << std::endl;
 	AdaptiveSequence<int> ads;
-	ads.push_front(5);
-	ads.push_front(6);
-	ads.push_front(7);
+	ads.push_back(5);
+	ads.push_back(6);
+	ads.push_back(7);
 	AdaptiveSequence<int>::iterator iterator1 = ads.begin();
-	ads.push_front(8);
+	ads.push_back(8);
 	std::cout << *iterator1 << std::endl;
 
 	//	AdaptiveSequence<int>::ite iterator = ads.begin();
@@ -29,7 +29,7 @@ int main() {
 	}
 	AdaptiveSequence<int>::iterator result = adalgorithm::find(ads.begin(),
 			ads.end(), 6);
-	std::cout << *result << std::endl;
+	std::cout << *(result++) << std::endl;
 
 	//	ads.getInternals();
 	//	for (int i = 0; i < 10000; i++)

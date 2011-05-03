@@ -20,13 +20,7 @@
 template<typename T, class Allocator = std::allocator<T> > class AdaptiveSequence {
 protected:
 	enum representation_t {
-		//<<<<<<< HEAD
-		//		LIST = 1, VECTOR = 2, DEQUEUE = 3
-		//=======
-		LIST = 1,
-		VECTOR = 2,
-		deque = 3
-	//>>>>>>> refs/remotes/origin/master
+		LIST = 1, VECTOR = 2, deque = 3
 	};
 	typedef struct {
 		std::list<T>* list;
@@ -185,6 +179,7 @@ public:
 			sequence->iteratorList.push_back(this);
 		}
 		reference operator*() {
+			currentSequence->log_operation(ACCESS_ELEMENT);
 			switch (tag) {
 			case LIST:
 				return *list_bidirectional_iterator;
@@ -231,7 +226,7 @@ public:
 				deque_random_access_iterator_counter++;
 				break;
 			}
-			return this;
+			return *this;
 		}
 		iterator& operator--() {
 			switch (tag) {
@@ -259,7 +254,7 @@ public:
 				deque_random_access_iterator--;
 				break;
 			}
-			return this;
+			return *this;
 		}
 
 		bool operator==(const iterator& __i) {
@@ -339,31 +334,39 @@ public:
 	void syncIterator(iterator* it) {
 		//		std::cout << "sync iterator from " << it->tag << " to "
 		//		<< it->currentSequence->internals.representation << std::endl;
-		representation_t rep = it->currentSequence->internals.representation;
-		switch (rep) {
-		case LIST:
-			it->tag = LIST;
-			it->list_bidirectional_iterator
-					= it->currentSequence->internals.contents.list->begin();
-		case VECTOR:
-			it->tag = VECTOR;
-			it->vector_random_access_iterator
-					= it->currentSequence->internals.contents.vector->begin();
-		case deque:
-			it->tag = deque;
-			it->deque_random_access_iterator
-					= it->currentSequence->internals.contents.dequeue->begin();
-		}
-		switch (it->tag) {
-		case LIST:
-			it += it->list_bidirectional_iterator_counter;
-			it->list_bidirectional_iterator_counter = 0;
-		case VECTOR:
-			it += it->vector_random_access_iterator_counter;
-			it->vector_random_access_iterator_counter = 0;
-		case deque:
-			it += it->deque_random_access_iterator;
-			it->deque_random_access_iterator_counter = 0;
+		representation_t rep = it->currentSequence->internals->representation;
+		if (rep != it->tag) {
+			switch (rep) {
+			case LIST:
+				it->tag = LIST;
+				it->list_bidirectional_iterator
+						= it->currentSequence->internals->contents.list->begin();
+				break;
+			case VECTOR:
+				it->tag = VECTOR;
+				it->vector_random_access_iterator
+						= it->currentSequence->internals->contents.vector->begin();
+				break;
+			case deque:
+				it->tag = deque;
+				it->deque_random_access_iterator
+						= it->currentSequence->internals->contents.deque->begin();
+				break;
+			}
+			switch (it->tag) {
+			case LIST:
+				it += it->list_bidirectional_iterator_counter;
+				it->list_bidirectional_iterator_counter = 0;
+				break;
+			case VECTOR:
+				it += it->vector_random_access_iterator_counter;
+				it->vector_random_access_iterator_counter = 0;
+				break;
+			case deque:
+				it += it->deque_random_access_iterator_counter;
+				it->deque_random_access_iterator_counter = 0;
+				break;
+			}
 		}
 	}
 	//=======
@@ -435,7 +438,7 @@ protected:
 					delete internals;
 					internals = insides;
 				}
-				//				syncIterators();
+				syncIterators();
 				operations.clear();
 			}
 			break;
@@ -463,7 +466,7 @@ protected:
 					delete internals;
 					internals = insides;
 				}
-				//				syncIterators();
+				syncIterators();
 				operations.clear();
 			}
 			break;
@@ -491,8 +494,10 @@ protected:
 					delete internals;
 					internals = insides;
 				}
+				syncIterators();
 				operations.clear();
 			}
+
 			break;
 		}
 	}

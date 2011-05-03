@@ -149,6 +149,11 @@ public:
 	//typedef ptrdiff_t difference_type;
 	//Iterators
 	struct iterator {
+		typedef std::bidirectional_iterator_tag iterator_category;
+		typedef ptrdiff_t difference_type;
+		typedef T value_type;
+		typedef T* pointer;
+		typedef T& reference;
 		//		typedef std::random_access_iterator_tag iterator_category;
 		typename std::list<T, Allocator>::iterator list_bidirectional_iterator;
 		typename std::vector<T, Allocator>::iterator

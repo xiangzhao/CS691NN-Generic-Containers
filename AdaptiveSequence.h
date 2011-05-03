@@ -169,7 +169,7 @@ public:
 			vector_random_access_iterator_counter = 0;
 			deque_random_access_iterator_counter = 0;
 			tag = sequence->internals->representation;
-			//			currentSequence = sequence;
+			currentSequence = sequence;
 			//			switch (sequence->internals.representation) {
 			//			case LIST:
 			//				tag = 1;

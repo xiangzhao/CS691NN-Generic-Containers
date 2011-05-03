@@ -6,8 +6,7 @@
  */
 #include <iostream>
 #include <vector>
-#include <algorithm>
-#include "AdaptiveSequence.h"
+#include "ad_algorithm.h"
 int main() {
 	//	char* pch = "Hello";
 	//	std::cout << *(pch + 1) << std::endl;
@@ -28,10 +27,14 @@ int main() {
 			!= ads.end(); ++iterator) {
 		std::cout << *iterator << std::endl;
 	}
-	ads.getInternals();
-	for (int i = 0; i < 10000; i++)
-		ads.push_front(i);
-	ads.getInternals();
+	AdaptiveSequence<int>::iterator result = adalgorithm::find(ads.begin(),
+			ads.end(), 6);
+	std::cout << *result << std::endl;
+
+	//	ads.getInternals();
+	//	for (int i = 0; i < 10000; i++)
+	//		ads.push_front(i);
+	//	ads.getInternals();
 	//	std::cout << *resultite << std::endl;
 	//	std::cout << *iterator << std::endl;
 	//	ads.getInternals();

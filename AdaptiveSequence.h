@@ -15,6 +15,7 @@
 #include <vector>
 #include <deque>
 #include <memory>
+#include <bits/stl_iterator_base_types.h>
 #include "adaptivity.h"
 
 template<typename T, class Allocator = std::allocator<T> > class AdaptiveSequence {
@@ -148,6 +149,7 @@ public:
 	//typedef ptrdiff_t difference_type;
 	//Iterators
 	struct iterator {
+		//		typedef std::random_access_iterator_tag iterator_category;
 		typename std::list<T, Allocator>::iterator list_bidirectional_iterator;
 		typename std::vector<T, Allocator>::iterator
 				vector_random_access_iterator;

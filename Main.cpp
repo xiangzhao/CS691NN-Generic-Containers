@@ -27,8 +27,11 @@ int main() {
 			!= ads.end(); ++iterator) {
 		std::cout << *iterator << std::endl;
 	}
-	AdaptiveSequence<int>::iterator result = adalgorithm::find(ads.begin(),
-			ads.end(), 6);
+	//	AdaptiveSequence<int>::iterator result = adalgorithm::find(ads.begin(),
+	//			ads.end(), 6);
+	AdaptiveSequence<int>::iterator result = std::find(ads.begin(), ads.end(),
+			6);
+
 	std::cout << *(result++) << std::endl;
 
 	//	ads.getInternals();

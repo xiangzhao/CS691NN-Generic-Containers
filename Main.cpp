@@ -19,7 +19,7 @@ int main() {
 	AdaptiveSequence<int>::iterator it = ads.insert(iterator1, 8);
 	std::cout << *it << std::endl;
 	//	ads.push_back(8);
-	std::cout << *iterator1 << std::endl;
+	std::cout << *(iterator1) << std::endl;
 
 	//	AdaptiveSequence<int>::ite iterator = ads.begin();
 	//	AdaptiveSequence<int>::ite iteratorend = ads.end();

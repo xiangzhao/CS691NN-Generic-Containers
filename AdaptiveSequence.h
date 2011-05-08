@@ -199,7 +199,7 @@ public:
 			sequence->iteratorList.push_back(this);
 		}
 		reference operator*() {
-			currentSequence->log_operation(ACCESS_ELEMENT);
+			//			currentSequence->log_operation(ACCESS_ELEMENT);
 			switch (tag) {
 			case LIST:
 				return *list_bidirectional_iterator;
@@ -981,26 +981,27 @@ public:
 		}
 		log_operation(READ_BACK);
 	}
-	iterator insert(iterator position, const T& __x) {
-		iterator result(this);
+	iterator insert(iterator& position, const T& __x) {
+		iterator insresult(this);
 		switch (internals->representation) {
 		case LIST:
-			result.list_bidirectional_iterator
+			insresult.list_bidirectional_iterator
 					= internals->contents.list->insert(
 							position.list_bidirectional_iterator, __x);
 			break;
 		case VECTOR:
-			result.vector_random_access_iterator
+			insresult.vector_random_access_iterator
 					= internals->contents.vector->insert(
 							position.vector_random_access_iterator, __x);
 			break;
 		case deque:
-			result.deque_random_access_iterator
+			insresult.deque_random_access_iterator
 					= internals->contents.deque->insert(
 							position.deque_random_access_iterator, __x);
 			break;
 		}
-		return result;
+		position++;
+		return insresult;
 		log_operation(INSERT);
 	}
 	//void insert(iterator position, size_type n, const T& x);

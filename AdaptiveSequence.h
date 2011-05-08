@@ -326,6 +326,7 @@ public:
 				deque_random_access_iterator_counter += __n;
 				break;
 			}
+			log_operation(ACCESS_ELEMENT);
 			return *this;
 		}
 		iterator& operator-=(const difference_type& __n) {
@@ -344,6 +345,7 @@ public:
 				deque_random_access_iterator_counter -= __n;
 				break;
 			}
+			log_operation(ACCESS_ELEMENT);
 			return *this;
 		}
 
@@ -897,26 +899,6 @@ public:
 		}
 		log_operation(ITERATE_OVER);
 	}
-	//<<<<<<< HEAD
-	//
-	//	void push_front(const T& x) {
-	//		switch (internals->representation) {
-	//		case LIST:
-	//			internals->contents.list->push_front(x);
-	//			break;
-	//		case VECTOR:
-	//			internals->contents.vector->push_front(x);
-	//			break;
-	//		case deque:
-	//			internals->contents.deque->push_front(x);
-	//			break;
-	//		}
-	//		log_operation(ACCESS_FRONT);
-	//	}
-	//
-	//=======
-	//
-	//>>>>>>> refs/remotes/origin/master
 	void push_front(const T& x) {
 		switch (internals->representation) {
 		case LIST:

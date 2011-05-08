@@ -63,6 +63,19 @@ protected:
 		}
 		complexity_class_t complexity(operation_t o, representation_t rep) {
 			switch (o) {
+			case INSERT:
+				switch (rep) {
+				case LIST:
+					return CONSTANT;
+					break;
+				case VECTOR:
+					return LINEAR;
+					break;
+				case deque:
+					return LINEAR;
+					break;
+				}
+				break;
 			case SORT:
 				return NLOGN;
 				break;
@@ -808,27 +821,6 @@ public:
 		log_operation(READ_FRONT);
 	}
 
-	void push_front(const T& x) {
-		switch (internals->representation) {
-		case LIST:
-			internals->contents.list->push_front(x);
-			break;
-		case VECTOR: {
-			int size = internals->contents.vector->size();
-			internals->contents.vector->resize(size + 1);
-			for (int i = 0; i < size; i++)
-				internals->contents.vector->at(i + 1)
-						= internals->contents.vector->at(i);
-			internals->contents.vector->at(0) = x;
-			break;
-		}
-		case deque:
-			internals->contents.deque->push_front(x);
-			break;
-		}
-		log_operation(WRITE_FRONT);
-	}
-
 	reference operator[](size_type n) {
 		return at(n);
 	}
@@ -877,7 +869,20 @@ public:
 	}
 
 	template<class InputIterator> void assign(InputIterator first,
-			InputIterator last);
+			InputIterator last) {
+		switch (internals->representation) {
+		case LIST:
+			internals->contents.list->assign(first, last);
+			break;
+		case VECTOR:
+			internals->contents.vector->assign(first, last);
+			break;
+		case deque:
+			internals->contents.deque->assign(first, last);
+			break;
+		}
+		log_operation(ITERATE_OVER);
+	}
 	void assign(size_type n, const T& u) {
 		switch (internals->representation) {
 		case LIST:
@@ -912,6 +917,26 @@ public:
 	//=======
 	//
 	//>>>>>>> refs/remotes/origin/master
+	void push_front(const T& x) {
+		switch (internals->representation) {
+		case LIST:
+			internals->contents.list->push_front(x);
+			break;
+		case VECTOR: {
+			int size = internals->contents.vector->size();
+			internals->contents.vector->resize(size + 1);
+			for (int i = 0; i < size; i++)
+				internals->contents.vector->at(i + 1)
+						= internals->contents.vector->at(i);
+			internals->contents.vector->at(0) = x;
+			break;
+		}
+		case deque:
+			internals->contents.deque->push_front(x);
+			break;
+		}
+		log_operation(WRITE_FRONT);
+	}
 	void pop_front() {
 		switch (internals->representation) {
 		case LIST:
@@ -956,7 +981,28 @@ public:
 		}
 		log_operation(READ_BACK);
 	}
-	//iterator insert(iterator position, const T& x);
+	iterator insert(iterator position, const T& __x) {
+		iterator result(this);
+		switch (internals->representation) {
+		case LIST:
+			result.list_bidirectional_iterator
+					= internals->contents.list->insert(
+							position.list_bidirectional_iterator, __x);
+			break;
+		case VECTOR:
+			result.vector_random_access_iterator
+					= internals->contents.vector->insert(
+							position.vector_random_access_iterator, __x);
+			break;
+		case deque:
+			result.deque_random_access_iterator
+					= internals->contents.deque->insert(
+							position.deque_random_access_iterator, __x);
+			break;
+		}
+		return result;
+		log_operation(INSERT);
+	}
 	//void insert(iterator position, size_type n, const T& x);
 	//template<class InputIterator> void insert(iterator position,
 	//		InputIterator first, InputIterator last);

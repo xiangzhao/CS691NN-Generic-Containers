@@ -74,6 +74,14 @@ const unsigned N = 3001;
 
 extern bool some_test;
 
+//	ads.getInternals();
+//	std::cout << *resultite << std::endl;
+//	std::cout << *iterator << std::endl;
+//	ads.getInternals();
+//	std::cout << *(++iterator) << std::endl;
+//	std::cout << *(++iterator) << std::endl;
+//	std::cout << *--iteratorend << std::endl;
+
 std::set<int> get_set(int) {
 	std::set<int> s;
 	for (int i = 0; i < N; ++i)
@@ -90,7 +98,7 @@ AdaptiveSequence<std::set<int> > generate() {
 		v.push_back(get_set(i));
 	if (some_test)
 		return v;
-	return AdaptiveSequence<std::set<int> >();
+	return AdaptiveSequence<std::set<int> > ();
 }
 
 float time_it() {
@@ -105,8 +113,8 @@ float time_it() {
 		t2 = clock();
 		std::cout << "sort took " << (float) ((t2 - t1)
 				/ (double) CLOCKS_PER_SEC) << std::endl;
-//		std::rotate(v.begin(), v.begin() + v.size() / 2, v.end());
-//		t3 = clock();
+		//		std::rotate(v.begin(), v.begin() + v.size() / 2, v.end());
+		//		t3 = clock();
 		//		std::cout << "rotate took " << (float) ((t3 - t2)
 		//				/ (double) CLOCKS_PER_SEC) << std::endl;
 	}

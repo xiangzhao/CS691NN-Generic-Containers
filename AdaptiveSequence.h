@@ -949,9 +949,41 @@ public:
 		return insresult;
 		log_operation(INSERT);
 	}
-	//void insert(iterator position, size_type n, const T& x);
-	//template<class InputIterator> void insert(iterator position,
-	//		InputIterator first, InputIterator last);
+	void insert(iterator position, size_type n, const T& __x) {
+		switch (internals->representation) {
+		case LIST:
+			internals->contents.list->insert(
+					position.list_bidirectional_iterator, n, __x);
+			break;
+		case VECTOR:
+			internals->contents.vector->insert(
+					position.vector_random_access_iterator, n, __x);
+			break;
+		case deque:
+			internals->contents.deque->insert(
+					position.deque_random_access_iterator, n, __x);
+			break;
+		}
+		log_operation(INSERT);
+	}
+	template<class InputIterator> void insert(iterator position,
+			InputIterator first, InputIterator last) {
+		switch (internals->representation) {
+		case LIST:
+			internals->contents.list->insert(
+					position.list_bidirectional_iterator, first, last);
+			break;
+		case VECTOR:
+			internals->contents.vector->insert(
+					position.vector_random_access_iterator, first, last);
+			break;
+		case deque:
+			internals->contents.deque->insert(
+					position.deque_random_access_iterator, first, last);
+			break;
+		}
+		log_operation(INSERT);
+	}
 	iterator& erase(iterator& position) {
 		iterator result(this);
 		switch (internals->representation) {

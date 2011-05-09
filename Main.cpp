@@ -10,18 +10,20 @@
 int main() {
 	//	char* pch = "Hello";
 	//	std::cout << *(pch + 1) << std::endl;
+	int t[5] = { 2, 4, 6, 8, 10 };
 	AdaptiveSequence<int> ads;
 	ads.push_back(5);
 	ads.push_back(6);
 	ads.push_back(7);
 	AdaptiveSequence<int>::iterator iterator1 = ads.begin();
 	iterator1++;
-	AdaptiveSequence<int>::iterator it = ads.insert(iterator1, 8);
-	it++;
-	std::cout << *it << std::endl;
-	AdaptiveSequence<int>::iterator ite = ads.erase(it);
-	std::cout << *ite << std::endl;
-	std::cout << *it << std::endl;
+	ads.insert(iterator1, t, t + 4);
+	//	ads.insert(iterator1, 3, 25);
+	//	it++;
+	//	std::cout << *it << std::endl;
+	//	AdaptiveSequence<int>::iterator ite = ads.erase(it);
+	//	std::cout << *ite << std::endl;
+	//	std::cout << *it << std::endl;
 	//	ads.push_back(8);
 	std::cout << *(iterator1) << std::endl;
 

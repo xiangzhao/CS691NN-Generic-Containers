@@ -15,6 +15,7 @@
 #include <vector>
 #include <deque>
 #include <memory>
+#include <algorithm>
 #include <bits/stl_iterator_base_types.h>
 #include "adaptivity.h"
 
@@ -981,7 +982,7 @@ public:
 		}
 		log_operation(INSERT);
 	}
-	iterator& erase(iterator& position) {
+	iterator erase(iterator& position) {
 		iterator result(this);
 		switch (internals->representation) {
 		case LIST:
@@ -1002,7 +1003,7 @@ public:
 		}
 		return result;
 	}
-	iterator& erase(iterator first, iterator last) {
+	iterator erase(iterator first, iterator last) {
 		iterator result(this);
 		switch (internals->representation) {
 		case LIST:
@@ -1076,10 +1077,24 @@ public:
 			internals->contents.list->sort();
 			break;
 		case VECTOR:
-			internals->contents.vector->sort();
+			std::sort(internals->contents.vector->begin(),internals->contents.vector->end());
+			/* std::list<T> temp();
+			for(std::vector<T>::iterator i=internals->contents.vector->begin();i!=internals->contents.vector->end();i++)
+				temp.push_back(*i);
+			temp.sort();
+			for(int i=0;i<internals->contents.vector->size();i++)
+				internals->contents.vector->at(i) = temp[i];
+			log_operation(ITERATE);*/
 			break;
 		case deque:
-			internals->contents.deque->sort();
+			/*std::list<T> temp();
+			for(std::vector<T>::iterator i=internals->contents.deque->begin();i!=internals->contents.deque->end();i++)
+				temp.push_back(*i);
+			temp.sort();
+			for(int i=0;i<internals->contents.deque->size();i++)
+				internals->contents.deque->at(i) = temp[i];
+			log_operation(ITERATE);*/
+			std::sort(internals->contents.deque->begin(),internals->contents.deque->end());
 			break;
 		}
 		log_operation(SORT);

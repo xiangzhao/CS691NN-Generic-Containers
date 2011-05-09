@@ -44,8 +44,8 @@ int main() {
 	//	std::cout << *(result++) << std::endl;
 
 	//	ads.getInternals();
-	//	for (int i = 0; i < 10000; i++)
-	//		ads.push_front(i);
+		for (int i = 0; i < 10000; i++)
+			ads.push_front(i);
 	//	ads.getInternals();
 	//	std::cout << *resultite << std::endl;
 	//	std::cout << *iterator << std::endl;

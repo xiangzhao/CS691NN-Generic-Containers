@@ -431,7 +431,7 @@ protected:
 					internals = insides;
 				} else {
 					ContentsADT* insides = new ContentsADT(deque);
-					std::cout << "ADAPT deque" << std::endl;
+					std::cout << "ADAPT DEQUE" << std::endl;
 					insides->contents.deque->resize(length);
 					typename std::list<T, Allocator>::iterator iter =
 							internals->contents.list->begin();
@@ -462,7 +462,7 @@ protected:
 					internals = insides;
 				} else {
 					ContentsADT* insides = new ContentsADT(deque);
-					std::cout << "ADAPT deque" << std::endl;
+					std::cout << "ADAPT DEQUE" << std::endl;
 					insides->contents.deque->resize(length);
 					for (int i = 0; i < length; i++)
 						insides->contents.deque->at(i)

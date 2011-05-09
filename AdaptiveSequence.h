@@ -1005,7 +1005,30 @@ public:
 		}
 		return result;
 	}
-	//iterator erase(iterator first, iterator last);
+	iterator& erase(iterator first, iterator last) {
+		iterator result(this);
+		switch (internals->representation) {
+		case LIST:
+			result.list_bidirectional_iterator
+					= internals->contents.list->erase(
+							first.list_bidirectional_iterator,
+							last.list_bidirectional_iterator);
+			break;
+		case VECTOR:
+			result.vector_random_access_iterator
+					= internals->contents.vector->erase(
+							first.vector_random_access_iterator,
+							last.vector_random_access_iterator);
+			break;
+		case deque:
+			result.deque_random_access_iterator
+					= internals->contents.deque->erase(
+							first.deque_random_access_iterator,
+							last.deque_random_access_iterator);
+			break;
+		}
+		return result;
+	}
 	void swap(AdaptiveSequence<T>& seq);
 	void clear() {
 		switch (internals->representation) {

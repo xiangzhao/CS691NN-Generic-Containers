@@ -26,6 +26,13 @@ int main() {
 	//	std::cout << *it << std::endl;
 	//	ads.push_back(8);
 	std::cout << *(iterator1) << std::endl;
+	AdaptiveSequence<int>::iterator iterator2 = ads.begin();
+	AdaptiveSequence<int>::iterator iterator3 = ads.end();
+	iterator2++;
+	iterator3--;
+	iterator3--;
+	ads.erase(iterator2, iterator3);
+	std::cout << "-------" << std::endl;
 
 	//	AdaptiveSequence<int>::ite iterator = ads.begin();
 	//	AdaptiveSequence<int>::ite iteratorend = ads.end();

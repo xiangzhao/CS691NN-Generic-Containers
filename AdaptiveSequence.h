@@ -336,7 +336,6 @@ public:
 			log_operation(ACCESS_ELEMENT);
 			return *this;
 		}
-
 	};
 	std::list<operation_t> operations;
 
@@ -923,7 +922,7 @@ public:
 		}
 		log_operation(READ_BACK);
 	}
-	iterator& insert(iterator& position, const T& __x) {
+	iterator insert(iterator& position, const T& __x) {
 		log_operation(INSERT);
 		iterator insresult(this);
 		switch (internals->representation) {

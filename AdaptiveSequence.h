@@ -698,6 +698,7 @@ public:
 	//const_iterator rend() const;
 
 	bool empty() const {
+		log_operation(READ_FRONT);
 		switch (internals->representation) {
 		case LIST:
 			return internals->contents.list->empty();
@@ -709,7 +710,6 @@ public:
 			return internals->contents.deque->empty();
 			break;
 		}
-		log_operation(READ_FRONT);
 	}
 
 	size_type size() {
@@ -724,8 +724,6 @@ public:
 			return internals->contents.deque->size();
 			break;
 		}
-		//Computing the size of the sequence requires iterating over it.
-		log_operation(ITERATE_OVER);
 	}
 	size_type max_size() {
 		switch (internals->representation) {
@@ -739,7 +737,6 @@ public:
 			return internals->contents.deque->max_size();
 			break;
 		}
-		log_operation(ITERATE_OVER);
 	}
 	void resize(size_type sz, T c = T()) {
 		switch (internals->representation) {
@@ -757,6 +754,7 @@ public:
 	}
 
 	reference front() {
+		log_operation(READ_FRONT);
 		switch (internals->representation) {
 		case LIST:
 			return internals->contents.list->front();
@@ -768,10 +766,10 @@ public:
 			return internals->contents.deque->front();
 			break;
 		}
-		log_operation(READ_FRONT);
 	}
 
 	const_reference front() const {
+		log_operation(READ_FRONT);
 		switch (internals->representation) {
 		case LIST:
 			return internals->contents.list->front();
@@ -783,7 +781,6 @@ public:
 			return internals->contents.deque->front();
 			break;
 		}
-		log_operation(READ_FRONT);
 	}
 
 	reference operator[](size_type n) {
@@ -794,6 +791,7 @@ public:
 	}
 
 	const_reference at(size_type n) const {
+		log_operation(ACCESS_ELEMENT);
 		switch (internals->representation) {
 		case LIST:
 			typename std::list<T, Allocator>::iterator iter =
@@ -810,10 +808,10 @@ public:
 			return internals->contents.deque->at(n);
 			break;
 		}
-		log_operation(ACCESS_ELEMENT);
 	}
 
 	reference at(size_type n) {
+		log_operation(ACCESS_ELEMENT);
 		switch (internals->representation) {
 		case LIST:
 			typename std::list<T, Allocator>::iterator iter =
@@ -830,7 +828,6 @@ public:
 			return internals->contents.deque->at(n);
 			break;
 		}
-		log_operation(ACCESS_ELEMENT);
 	}
 
 	template<class InputIterator> void assign(InputIterator first,
@@ -927,6 +924,7 @@ public:
 		log_operation(READ_BACK);
 	}
 	iterator& insert(iterator& position, const T& __x) {
+		log_operation(INSERT);
 		iterator insresult(this);
 		switch (internals->representation) {
 		case LIST:
@@ -947,7 +945,6 @@ public:
 		}
 		position++;
 		return insresult;
-		log_operation(INSERT);
 	}
 	void insert(iterator position, size_type n, const T& __x) {
 		switch (internals->representation) {
@@ -1089,7 +1086,7 @@ public:
 			std::cout << "VECTOR" << std::endl;
 			break;
 		case deque:
-			std::cout << "deque" << std::endl;
+			std::cout << "DEQUE" << std::endl;
 			break;
 		}
 	}

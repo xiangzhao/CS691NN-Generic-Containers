@@ -17,6 +17,10 @@ int main() {
 	AdaptiveSequence<int>::iterator iterator1 = ads.begin();
 	iterator1++;
 	AdaptiveSequence<int>::iterator it = ads.insert(iterator1, 8);
+	it++;
+	std::cout << *it << std::endl;
+	AdaptiveSequence<int>::iterator ite = ads.erase(it);
+	std::cout << *ite << std::endl;
 	std::cout << *it << std::endl;
 	//	ads.push_back(8);
 	std::cout << *(iterator1) << std::endl;
@@ -26,10 +30,10 @@ int main() {
 	//	std::vector<int>::iterator resultite = std::find(
 	//			iterator.vector_random_access_iterator,
 	//			iteratorend.vector_random_access_iterator, 6);
-	//	for (AdaptiveSequence<int>::iterator iterator = ads.begin(); iterator
-	//			!= ads.end(); ++iterator) {
-	//		std::cout << *iterator << std::endl;
-	//	}
+	for (AdaptiveSequence<int>::iterator iterator = ads.begin(); iterator
+			!= ads.end(); ++iterator) {
+		std::cout << *iterator << std::endl;
+	}
 	//	AdaptiveSequence<int>::iterator result = adalgorithm::find(ads.begin(),
 	//			ads.end(), 6);
 	//	AdaptiveSequence<int>::iterator result = std::find(ads.begin(), ads.end(),

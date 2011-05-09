@@ -184,18 +184,6 @@ public:
 			deque_random_access_iterator_counter = 0;
 			tag = sequence->internals->representation;
 			currentSequence = sequence;
-			//			switch (sequence->internals.representation) {
-			//			case LIST:
-			//				tag = 1;
-			//				break;
-			//			case VECTOR:
-			//				tag = 2;
-			//				break;
-			//			case DEQUEUE:
-			//				tag = 3;
-			//				break;
-			//			}
-
 			sequence->iteratorList.push_back(this);
 		}
 		reference operator*() {
@@ -351,11 +339,8 @@ public:
 
 	};
 	std::list<operation_t> operations;
-	//<<<<<<< HEAD
 
 	void syncIterator(iterator* it) {
-		//		std::cout << "sync iterator from " << it->tag << " to "
-		//		<< it->currentSequence->internals.representation << std::endl;
 		representation_t rep = it->currentSequence->internals->representation;
 		if (rep != it->tag) {
 			switch (rep) {
@@ -391,9 +376,6 @@ public:
 			}
 		}
 	}
-	//=======
-	//	void syncIterator(iterator* it);
-	//>>>>>>> refs/remotes/origin/master
 	void syncIterators() {
 		for (typename std::list<iterator*>::iterator it = iteratorList.begin(); it
 				!= iteratorList.end(); ++it) {
@@ -524,9 +506,6 @@ protected:
 		}
 	}
 	ContentsADT* internals;
-	//<<<<<<< HEAD
-	//=======
-	//<<<<<<< HEAD
 public:
 	//	typedef Allocator allocator_type;
 	//	typedef typename Allocator::value_type value_type;
@@ -637,31 +616,6 @@ public:
 	//		}
 	//
 	//	};
-	typedef typename std::list<T>::iterator list_bidirectional_iterator;
-	typedef typename std::list<T>::const_iterator
-			const_list_bidirectonal_iterator;
-	typedef typename std::vector<T>::iterator vector_random_access_iterator;
-	typedef typename std::vector<T>::const_iterator
-			const_vector_random_access_iterator;
-	typedef typename std::deque<T>::iterator deque_random_access_iterator;
-	typedef typename std::deque<T>::const_iterator
-			const_deque_random_access_iterator;
-	typedef std::reverse_iterator<const_vector_random_access_iterator>
-			const_reverse_iterator;
-	typedef std::reverse_iterator<vector_random_access_iterator>
-			reverse_iterator;
-
-	//	void syncIterator(iterator* it) {
-	//		representation_t rep = it->currentSequence->internals->representation;
-	//		int tag = it->tag;
-	//		//		switch ();
-	//
-	//	}
-	//>>>>>>> refs/remotes/origin/master
-
-public:
-	typedef iterator iterator;
-
 	//	typedef typename std::list<T>::iterator list_bidirectional_iterator;
 	//	typedef typename std::list<T>::const_iterator
 	//			const_list_bidirectonal_iterator;
@@ -676,6 +630,15 @@ public:
 	//	typedef std::reverse_iterator<vector_random_access_iterator>
 	//			reverse_iterator;
 
+	//	void syncIterator(iterator* it) {
+	//		representation_t rep = it->currentSequence->internals->representation;
+	//		int tag = it->tag;
+	//		//		switch ();
+	//
+	//	}
+	//>>>>>>> refs/remotes/origin/master
+
+public:
 	AdaptiveSequence() {
 		internals = new ContentsADT(VECTOR);
 	}
@@ -963,7 +926,7 @@ public:
 		}
 		log_operation(READ_BACK);
 	}
-	iterator insert(iterator& position, const T& __x) {
+	iterator& insert(iterator& position, const T& __x) {
 		iterator insresult(this);
 		switch (internals->representation) {
 		case LIST:
@@ -989,7 +952,27 @@ public:
 	//void insert(iterator position, size_type n, const T& x);
 	//template<class InputIterator> void insert(iterator position,
 	//		InputIterator first, InputIterator last);
-	//iterator erase(iterator position);
+	iterator& erase(iterator& position) {
+		iterator result(this);
+		switch (internals->representation) {
+		case LIST:
+			result.list_bidirectional_iterator
+					= internals->contents.list->erase(
+							position.list_bidirectional_iterator);
+			break;
+		case VECTOR:
+			result.vector_random_access_iterator
+					= internals->contents.vector->erase(
+							position.vector_random_access_iterator);
+			break;
+		case deque:
+			result.deque_random_access_iterator
+					= internals->contents.deque->erase(
+							position.deque_random_access_iterator);
+			break;
+		}
+		return result;
+	}
 	//iterator erase(iterator first, iterator last);
 	void swap(AdaptiveSequence<T>& seq);
 	void clear() {

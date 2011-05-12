@@ -71,22 +71,89 @@
 #include <algorithm>
 #include "AdaptiveSequence.h"
 
-const unsigned N = 10000000;
-int main() {
+const unsigned TEST1 = 1000000;
+const unsigned TEST2 = 1000;
+/* push back and then push front:
+ * Result: Ad-list-deque
+ * Time:   380000-410000-170000
+ * We already know that deque is best for push front and push back compared to list.
+ * The adaptive sequence correctly adapts to deque
+ */
+void test1() {
 	AdaptiveSequence<int> adsequence;
 	clock_t t1 = clock();
-	for (int j = 0; j < N; j++) {
+	for (int j = 0; j < TEST1; j++) {
+		adsequence.push_front(j);
 		adsequence.push_back(j);
 	}
 	clock_t t2 = clock();
 	std::cout << (float) (t2 - t1) << std::endl;
-	std::vector<int> l;
+	std::list<int> l;
 	clock_t t3 = clock();
-	for (int j = 0; j < N; j++) {
+	for (int j = 0; j < TEST1; j++) {
+		l.push_front(j);
 		l.push_back(j);
 	}
 	clock_t t4 = clock();
-	std::cout << (float) (t4 - t3);
+	std::cout << (float) (t4 - t3) << std::endl;
+	std::deque<int> d;
+	clock_t t5 = clock();
+	for (int j = 0; j < TEST1; j++) {
+		d.push_front(j);
+		d.push_back(j);
+	}
+	clock_t t6 = clock();
+	std::cout << (float) (t6 - t5) << std::endl;
+}
+/* push back and then sort
+ * Result: ad-deque-list-vector
+ * Time:   330000-1030000-140000-330000
+ * The performance is better than deque, but significantly lower than vector and list
+ */
+void test2() {
+	AdaptiveSequence<int> adsequence;
+	clock_t t1 = clock();
+	for (int j = TEST2; j >= 0; j--) {
+		adsequence.push_back(j);
+		adsequence.sort();
+	}
+	clock_t t2 = clock();
+	std::cout << (float) (t2 - t1) << std::endl;
+	std::deque<int> d;
+	clock_t t3 = clock();
+	for (int j = TEST2; j >= 0; j--) {
+		d.push_back(j);
+		std::sort(d.begin(), d.end());
+	}
+	clock_t t4 = clock();
+	std::cout << (float) (t4 - t3) << std::endl;
+	std::list<int> l;
+	clock_t t5 = clock();
+	for (int j = TEST2; j >= 0; j--) {
+		l.push_back(j);
+		l.sort();
+	}
+	clock_t t6 = clock();
+	std::cout << (float) (t6 - t5) << std::endl;
+	std::vector<int> v;
+	clock_t t7 = clock();
+	for (int j = TEST2; j >= 0; j--) {
+		v.push_back(j);
+		std::sort(v.begin(), v.end());
+	}
+	clock_t t8 = clock();
+	std::cout << (float) (t8 - t7) << std::endl;
+}
+int main() {
+	test1();
+	test2();
+	//	AdaptiveSequence<int> l;
+	//	l.push_back(4);
+	//	l.push_back(3);
+	//	l.push_back(7);
+	//	l.sort();
+	//	for (AdaptiveSequence<int>::iterator it = l.begin(); it != l.end(); it++)
+	//		std::cout << *it << std::endl;
 }
 
 //const unsigned N = 3;

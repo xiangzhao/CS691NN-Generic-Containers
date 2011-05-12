@@ -131,7 +131,7 @@ protected:
 					return LINEAR;
 					break;
 				case VECTOR:
-					return LINEAR;
+					return CONSTANT;
 					break;
 				case deque:
 					return CONSTANT;

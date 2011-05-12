@@ -199,6 +199,7 @@ void test3() {
 	std::cout << "Time for Vector: " << (float) (t8 - t7) << std::endl;
 }
 int main() {
+	std::cout << "Clock ticks per second: " << CLOCKS_PER_SEC << std::endl;
 	test1();
 	test2();
 	test3();

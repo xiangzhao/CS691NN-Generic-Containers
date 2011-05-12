@@ -3,6 +3,7 @@
 \documentclass[twocolumn,english,natbib]{sigplanconf}
 \usepackage[T1]{fontenc}
 \usepackage{array}
+\usepackage{amsmath}
 
 \makeatletter
 
@@ -186,28 +187,28 @@ objects to create arbitrarily or at random.
 
 For the third iteration, we evaluated the performance of the various
 sequence data structures using three different workloads: a push\_back-push\_front
-workload of 1000000 elements, a push\_back-and-sort workload of 1000
-elements, and an insertion workload of 100,000 elements. Our operation-log
-size, the number of operations to log before checking whether to adapt,
-was initially set at 100, and if an adaptation was not performed after
-that many operations we doubled it.
+workload of 1,000,000 elements, a push\_back-and-sort workload of
+1,000 elements, and an insertion workload of 100,000 elements. Our
+operation-log size, the number of operations to log before checking
+whether to adapt, was initially set at 100, and if an adaptation was
+not performed after that many operations we doubled it.
 
-\begin{table}[tbh]
+\begin{figure}[tbh]
 \begin{tabular}{|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|}
 \hline 
  & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector<int>\tabularnewline
 \hline 
-push\_back-push\_front: 1,000,000 elements & 370,000 ticks & 110,000 ticks & 430,000 ticks & N/A\tabularnewline
+push\_back-push\_front: 1,000,000 elements & 370 milliseconds & 110 milliseconds & 430 milliseconds & N/A\tabularnewline
 \hline 
 \hline 
-push\_back-and-sort: 1,000 elements & 340,000 ticks & 960,000 ticks & 150,000 ticks & 340,000 ticks\tabularnewline
+push\_back-and-sort: 1,000 elements & 340 milliseconds & 960 milliseconds & 150 milliseconds & 340 milliseconds\tabularnewline
 \hline 
-insertions: 100,000 elements & 2,070,000 ticks & 40,000 ticks & 30,000 ticks & 3,420,000 ticks\tabularnewline
+insertions: 100,000 elements & 2,070 milliseconds & 40 milliseconds & 30 milliseconds & 3,420 milliseconds\tabularnewline
 \hline 
 \end{tabular}
 
 \caption{Performance evaluation results for Iteration 3}
-\end{table}
+\end{figure}
 
 
 In this iteration, we saw significant improvement in the performance
@@ -241,9 +242,69 @@ correctly-selected STL data structure, but manages to usually beat
 the worst selection of STL data structure.
 
 
-\section{Conclusions}
+\section{Discussion and Conclusions}
+
+
+\subsection{Realism of benchmarks}
+
+It is questionable whether our benchmark workloads truly and accurately
+represented the performance and ideal use-case of an adaptive sequence.
+Each workload consisted of large blocks of identical operations performed
+in a loop, and therefore could always have performed better when given
+a best-choice STL data structure. In real workloads driven by real
+large-scale programs, the sequence of operations performed on a data
+structure is not likely to be identical, and in fact will probably
+vary significantly. In that situation, the adaptivity functionality
+should aid performance more than it does in the uniform case.
+
+
+\subsection{Further possible adaptation techniques}
+
+Our current implementation of the adaptive sequence keeps a log of
+previously-performed operations and, when it adapts, adapts to whatever
+internal data structure would most quickly have performed the past
+workload. The space usage for logging the operations is linear in
+the number of operations logged, and time usage for logging the operations
+and performing the actual adaptation are O(max(\emph{n},\emph{m})),
+where \emph{n} is the number of operations logged and \emph{m} is
+the number of elements in the adaptive sequence. Our tests have shown
+that while this adaptation technique consistently beats the worst-choice
+STL data structure, it usually performs identically or slightly worse
+than the second-best-choice.
+
+In order to reduce the overhead of deciding when and how to adapt,
+and of the actual adaptation, we could reengineer the internals of
+the adaptive sequence to decide these matters using probabilistic
+reasoning. The adaptive sequence would have counters for each kind
+of operation, each initialized to 1, and would count operations the
+operations it has performed. Rather than keeping a log of each operation,
+we would log the kind of operation by simply incrementing its counter.
+Upon logging \emph{n} operations and with \emph{K} kinds of operations,
+we would adapt by calculating the probability \emph{P(k)} that a given
+operation will be of kind \emph{k} as: 
+\[
+P(k)=\frac{C(k)}{n+K}
+\]
+ Using those probabilities, we could reconstruct a summed-up workload
+of \emph{n} operations and calculate its costs for each internal data
+structure. For an internal data structure \emph{rep}, an operation
+kind \emph{k} with probability \emph{P(k)}, and \emph{n} operations,
+we would find: 
+\[
+\underset{k}{\sum}nP(k)cost(k,rep)
+\]
+
+
+Since we would only have to track one probability for each operation
+kind and the counter increments would have to be done only once per
+kind per operation, the space costs of logging operations would drop
+to O(1) while the time requirements would remain constant. Using the
+updated probabilities to summarize the log of operations we're not
+keeping will also cut down the asymptotic complexity of adapting itself,
+since calculating the costs of internal representations will take
+only constant time.
 \begin{acks}
-We would like to thank ...\end{acks}
+We would like to thank Professor Emery Berger.\end{acks}
 \begin{thebibliography}{References}
 \bibitem{Liu2009}L. Liu and S. Rus. perflint: A Context Sensitive
 Performance Advisor for C++ Programs. In \emph{Proceedings of the

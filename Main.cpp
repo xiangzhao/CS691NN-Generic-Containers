@@ -151,7 +151,7 @@ void test2() {
 }
 /* insert
  * Result: ad-deque-list-vector
- * Time:   2070000-40000-30000-3420000
+ * Time:   60000-40000-30000-3420000
  * The performance is better than vector. Fortunately it's not the worst, and it can correct
  * those users who don't know the overhead of inserting elements
  * randomly into vector is very large.

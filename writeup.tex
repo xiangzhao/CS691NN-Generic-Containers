@@ -36,7 +36,7 @@ characteristics when tested against the original C++ STL.
 \terms{Algorithms, Performance, Design}
 
 
-\section{Introduction}
+\section{Introduction and Motivation}
 
 The C++ Standard Template Library is one of the most widely used software
 libraries in the world. For every \emph{concept} in the library, multiple
@@ -47,10 +47,42 @@ both in terms of asymptotic time complexity and memory locality, and
 serious losses in performance have been observed\cite{Liu2009} due
 to using the wrong data structure.
 
-In the ideal case, the programmer should be able to simply ask for
-a sequence and not have to worry about the precise implementation.
-We have attempted to take a step towards that condition by building
-an \emph{adaptive} sequence. Our adaptive sequence logs the method-calls
+This situation runs against a core ideal in both systems and programming
+languages: modularity. In a modular system, different components couple
+loosely, via their interfaces alone, and components with identical
+interfaces can thus be exchanged for one another transparently. The
+Java programming language directly provides a means for component-based
+programming in the form of interfaces\cite{Krone2003}. While the
+C++ Standard Template Library does not include the public abstract
+virtual super-classes for its data structures that would correspond
+to Java interfaces, it does structure its different data-structure
+and iterator implementations according to a fixed number of \emph{concepts},
+specifications of what operations (and with what signatures) a template
+parameter should support for use in a particular template. Concepts
+have been drafted for inclusion in the C++ language standard\cite{ISO2009},
+but have not been officially included yet. Despite their lack of official
+inclusion, the STL provides implementations of a number of concepts
+in its iterators and data structures.
+
+Given different, loosely-coupled data structures and iterators implementing
+the same concept or interface, programmers should be able to tune
+the performance of their code by simply switching the particular implementation
+under use and recompiling. Even programmers working on performance-critical
+C++ applications should be able to simply ask for a {}``set'' or
+a {}``sequence'' and not have to worry about the precise implementation
+until the profiling stage of their development cycle, as can currently
+be done using the Java Collections Framework. In fact, in the ideal
+case the programmer should simply ask for a {}``set'' or {}``sequence''
+and have a performance-tuning tool determine precisely what implementation
+to use\emph{ for} them until such time as they feel the need to take
+manual control.
+
+Unfortunately, the STL does not document concepts common to all its
+data structures implementing a given hypothetical abstract data-type,
+only iterators, and it provides no interfaces in the Java sense at
+all. We have attempted to remedy this situation, and to take a step
+towards the ideal of self-tuning applications, by building an \emph{adaptive}
+sequence template class for C++. Our adaptive sequence logs the method-calls
 it receives and uses that history to \emph{adapt} its internal data
 structure, changing to a list, vector, or deque for the optimal asymptotic
 time complexity.
@@ -80,23 +112,40 @@ useful in benchmarking our own adaptive sequences. Brainy achieved
 \section{Design and API support}
 
 Our adaptive sequence supports most of the combined method set of
-STL lists, vectors, and deques. It currently only lacks a small number
-of methods and the production of random-access iterators rather than
-bidirectional iterators. It can therefore be used as an imperfect
-but workable drop-in replacement for many, if not most, uses of STL
-sequences.
+\noun{std::list<T>}, \noun{std::vector<T>}, and \noun{std::deque<T>}.
+It currently only lacks a small number of methods and the production
+of random-access iterators rather than bidirectional iterators. It
+can therefore be used as an imperfect but workable drop-in replacement
+for many, if not most, uses of STL sequences. The STL does not specify
+a particular concept or interface for any of its sequence data structures,
+and this has prevented us from producing a genuine drop-in replacement.
 
-The adaptive sequence logs the methods called upon it, and upon each
-operation calculates the amortized complexity of having performed
-the entire logged set of operations with each possible internal data
-structure. The internal STL vector, list, or deque itself is stored
-as a tagged variant, on which tag dispatch is done to execute methods
-upon the internal data structure. When a logged set of operations
-could have been done more quickly with an internal data structure
-besides the one currently in use (accounting for a full iteration
-over the sequence to convert it), the internal data-structure is \emph{adapted}
-to the optimal alternative; all data elements are moved into the new
-internal data structure while preserving their locations and order.
+The adaptive sequence logs the methods called upon it, and also keeps
+track of the log's length. When the log reaches a certain length \emph{n},
+the adaptive sequence calculates the amortized complexity of having
+performed the entire logged set of operations with each possible internal
+data structure, with an extra iteration over every item of the sequence
+being included to account for the representation conversion itself.
+It then creates a new instance of the possible internal data structure
+(list, vector, or deque) that would have performed the logged operations
+the fastest, copies the contents of the sequence into the new internal
+data structure, replaces the internal data structure, and sets a dirty
+flag to alert any active iterators to the change. Moving data elements
+into the new internal sequence preserves their indices and ordering
+within the sequence.
+
+The internal STL vector, list, or deque itself is stored as a tagged
+variant, on which tag switching is done to execute methods upon the
+internal data structure. This means that rather than implementing
+the internal sequences ourselves, we wrap around the highly-optimized
+STL implementations in order to focus our primary efforts on the adaptation
+machinery itself. When an STL data structure does not provide a method
+we provide, such as the \noun{sort()} method, we copy out the elements
+of our sequence into an alternative that \emph{does} support that
+method, run the method on that temporary data structure, copy the
+contents back into our original (if mutation could have occurred),
+and return the relevant result -- logging all the necessary sequence
+operations to account for the performance penalty at adaptation-time.
 
 The drawback to our API implementation is that, since we only support
 bidirectional iterators rather than random-access iterators, a number
@@ -113,6 +162,25 @@ of our amortized-complexity calculations.
 
 \section{Performance evaluation}
 
+We evaluated the performance of our adaptive sequence in a number
+of iterations, each one coming after applying several more optimizations
+to our implementation of the adaptive sequence itself. To evaluate
+our adaptive sequence, we applied fixed workloads of method calls
+to each of the separate STL sequences supporting the relevant methods
+and to our adaptive sequence, and recorded the time taken by each
+data structure to perform the workload.
+
+
+\subsection{Iteration 1: naive implementation}
+
+
+\subsection{Iteration 2: some optimization}
+
+
+\subsection{Iteration 3: further optimization}
+
+
+
 
 \section{Conclusions}
 \begin{acks}
@@ -126,6 +194,14 @@ March 2009.
 \bibitem{Jung2011}Changhee Jung, Silvius Rus, Brian P. Railing, Nathan
 Clark, and Santosh Pande. Brainy: Effective Selection of Data Structures.
 In \emph{Proceedings of the 2011 ACM conference on Programming Language
-Design and Implementation}, preprint, retrieved May 2011.   \end{thebibliography}
+Design and Implementation}, preprint, retrieved May 2011.
+
+\bibitem{Krone2003}Joan Krone. Multiple implementations for component
+based software using Java interfaces. In \emph{Journal of Computing
+in Small Colleges}, volume 19, issue 1, pp 30-38, October 2003.
+
+\bibitem{ISO2009}Working Draft, Standard for Programming Language
+C++ (version of 2009-06-22), \emph{International Standards Organization},
+June 2009.\end{thebibliography}
 
 \end{document}

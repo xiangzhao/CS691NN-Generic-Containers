@@ -2,6 +2,14 @@
 %% Do not edit unless you really know what you are doing.
 \documentclass[twocolumn,english,natbib]{sigplanconf}
 \usepackage[T1]{fontenc}
+
+\makeatletter
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
+\newcommand{\noun}[1]{\textsc{#1}}
+
+\makeatother
+
 \usepackage{babel}
 \begin{document}
 
@@ -15,9 +23,14 @@
 xiang@cs.umass.edu}
 \maketitle
 \begin{abstract}
-This paper is a demonstration of the Lyx template for the ACM alternate
-latex style file. It works quite well and makes writing an ACM paper
-so much easier.
+The C++ Standard Template Library provides a variety of sequence data
+structures, each of which has different performance characteristics.
+Performing the wrong operations upon a sequence \emph{en masse} can
+result in major performance penalties. We have therefore created an
+\emph{adaptive} sequence in C++ that changes its internal representation
+to the optimal data structure for the operations being performed upon
+it. We present the adaptive sequence's design and evaluate its performance
+characteristics when tested against the original C++ STL.
 \end{abstract}
 
 \terms{Algorithms, Performance, Design}
@@ -25,14 +38,77 @@ so much easier.
 
 \section{Introduction}
 
+The C++ Standard Template Library is one of the most widely used software
+libraries in the world. For every \emph{concept} in the library, multiple
+implementations are provided as concrete classes. The sequence concept
+is provided in the vector, (doubly-linked) list, and deque (double-ended
+queue) forms. Each of these has different performance characteristics
+both in terms of asymptotic time complexity and memory locality, and
+serious losses in performance have been observed\cite{Liu2009} due
+to using the wrong data structure.
+
+In the ideal case, the programmer should be able to simply ask for
+a sequence and not have to worry about the precise implementation.
+We have attempted to take a step towards that condition by building
+an \emph{adaptive} sequence. Our adaptive sequence logs the method-calls
+it receives and uses that history to \emph{adapt} its internal data
+structure, changing to a list, vector, or deque for the optimal asymptotic
+time complexity.
+
 
 \subsection{Related Work}
-\begin{enumerate}
-\item test
-\item test
-\end{enumerate}
+
+Liu et al\cite{Liu2009} found that choosing the right STL data structure
+can result in as much as a 17\% speed improvement, with many smaller
+improvements being found. Their code analyzer did not allow for generic
+treatment of sequences without regard to their implementation but
+required that the code only employ the methods shared between all
+the STL sequence classes.
+
+A group of researchers set out to use machine-learning techniques
+to decide what data structure should be used where, producing software
+they called Brainy\cite{Jung2011}. Brainy used empirical time and
+space measurements to determine the real relative performance of different
+set implementations, and thus trained a neural network to analyze
+code and determine what data structures to use. Brainy trained its
+neural-network using randomly-generated applications built by its
+\emph{application generator}, software that would have proved extremely
+useful in benchmarking our own adaptive sequences. Brainy achieved
+27\% and 33\% speed-ups on two different test machines.
+
 
 \section{Design and API support}
+
+Our adaptive sequence supports most of the combined method set of
+STL lists, vectors, and deques. It currently only lacks a small number
+of methods and the production of random-access iterators rather than
+bidirectional iterators. It can therefore be used as an imperfect
+but workable drop-in replacement for many, if not most, uses of STL
+sequences.
+
+The adaptive sequence logs the methods called upon it, and upon each
+operation calculates the amortized complexity of having performed
+the entire logged set of operations with each possible internal data
+structure. The internal STL vector, list, or deque itself is stored
+as a tagged variant, on which tag dispatch is done to execute methods
+upon the internal data structure. When a logged set of operations
+could have been done more quickly with an internal data structure
+besides the one currently in use (accounting for a full iteration
+over the sequence to convert it), the internal data-structure is \emph{adapted}
+to the optimal alternative; all data elements are moved into the new
+internal data structure while preserving their locations and order.
+
+The drawback to our API implementation is that, since we only support
+bidirectional iterators rather than random-access iterators, a number
+of the STL \emph{algorithms} (a misnomer, as these are templated library
+functions implementing common algorithms rather than just theoretical
+algorithms) do not work on the adaptive sequence at this time. Each
+iterator operation can also only count for a single constant-time
+operation alone. Such operations are not logged because this would
+result in logging N constant-time \noun{ACCESS\_ELEMENT} operations
+for a full iteration over a sequence of N elements rather than logging
+an \noun{ITERATE\_OVER} operation. This would throw off the accuracy
+of our amortized-complexity calculations.
 
 
 \section{Performance evaluation}
@@ -42,13 +118,14 @@ so much easier.
 \begin{acks}
 We would like to thank ...\end{acks}
 \begin{thebibliography}{References}
-\bibitem{ahmed02}Amal~J. Ahmed, Andrew~W. Appel, and Roberto Virga.\newblock
-A stratified semantics of general references embeddable in higher-order
-logic.\newblock I\emph{n Proceedings of the 17th Annual IEEE Symposium
-on Logic in Computer Science (LICS 2002)}, July 2002.
+\bibitem{Liu2009}L. Liu and S. Rus. perflint: A Context Sensitive
+Performance Advisor for C++ Programs. In \emph{Proceedings of the
+2009 International Symposium on Code Generation and Optimization},
+March 2009.
 
-\bibitem{appel01:fpcc}Andrew~W. Appel.\newblock Foundational proof-carrying
-code.\newblock In \emph{Symposium on Logic in Computer Science (LICS
-\textquoteright{}01)}, pages 247--258. IEEE, 2001.\end{thebibliography}
+\bibitem{Jung2011}Changhee Jung, Silvius Rus, Brian P. Railing, Nathan
+Clark, and Santosh Pande. Brainy: Effective Selection of Data Structures.
+In \emph{Proceedings of the 2011 ACM conference on Programming Language
+Design and Implementation}, preprint, retrieved May 2011.   \end{thebibliography}
 
 \end{document}

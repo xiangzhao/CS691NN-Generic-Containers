@@ -19,8 +19,10 @@
 #include <bits/stl_iterator_base_types.h>
 #include "adaptivity.h"
 
+//const int OPSIZE = 100;
 template<typename T, class Allocator = std::allocator<T> > class AdaptiveSequence {
 protected:
+	int opsize;
 	enum representation_t {
 		LIST = 1, VECTOR = 2, deque = 3
 	};
@@ -395,7 +397,7 @@ protected:
 
 	void log_operation(operation_t op) {
 		operations.push_front(op);
-		if (operations.size() == 1000) {
+		if (operations.size() == opsize) {
 			attempt_adaptation();
 			operations.clear();
 		}
@@ -514,8 +516,10 @@ protected:
 				syncIterators();
 				operations.clear();
 			}
-
 			break;
+		default:
+			//Adapt the window size
+			opsize = 2 * opsize;
 		}
 	}
 	ContentsADT* internals;
@@ -654,6 +658,14 @@ public:
 public:
 	AdaptiveSequence() {
 		internals = new ContentsADT(VECTOR);
+		opsize = 100;
+	}
+	template<typename _InputIterator> AdaptiveSequence(_InputIterator first,
+			_InputIterator last) {
+		internals = new ContentsADT(VECTOR);
+		internals->contents.vector = new std::vector<T>(first, last);
+		opsize = 100;
+
 	}
 	/* AdaptiveSequence() :
 	 internals(VECTOR) {

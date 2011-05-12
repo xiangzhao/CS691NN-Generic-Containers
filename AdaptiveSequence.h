@@ -400,7 +400,6 @@ protected:
 		if (operations.size() >= opsize) {
 			attempt_adaptation();
 			operations.clear();
-			//			opsize = 100;
 		}
 	}
 	unsigned int represent_costs(representation_t rep) {

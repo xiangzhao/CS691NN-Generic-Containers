@@ -400,7 +400,7 @@ protected:
 		if (operations.size() >= opsize) {
 			attempt_adaptation();
 			operations.clear();
-			opsize = 100;
+			//			opsize = 100;
 		}
 	}
 	unsigned int represent_costs(representation_t rep) {
@@ -459,9 +459,9 @@ protected:
 					internals = insides;
 				}
 				syncIterators();
+				opsize = 100;
 				operations.clear();
-			}
-			else
+			} else
 				opsize *= 2;
 			break;
 		case VECTOR:
@@ -489,9 +489,9 @@ protected:
 					internals = insides;
 				}
 				syncIterators();
+				opsize = 100;
 				operations.clear();
-			}
-			else
+			} else
 				opsize *= 2;
 			break;
 		case DEQUE:
@@ -519,9 +519,9 @@ protected:
 					internals = insides;
 				}
 				syncIterators();
+				opsize = 100;
 				operations.clear();
-			}
-			else
+			} else
 				opsize *= 2;
 			break;
 		}

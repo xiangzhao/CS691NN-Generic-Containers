@@ -315,7 +315,7 @@ public:
 				deque_random_access_iterator_counter += __n;
 				break;
 			}
-			log_operation(ACCESS_ELEMENT);
+			currentSequence->log_operation(ACCESS_ELEMENT);
 			return *this;
 		}
 		iterator& operator-=(const difference_type& __n) {
@@ -334,11 +334,20 @@ public:
 				deque_random_access_iterator_counter -= __n;
 				break;
 			}
-			log_operation(ACCESS_ELEMENT);
+			currentSequence->log_operation(ACCESS_ELEMENT);
+			return *this;
+		}
+		iterator operator+(difference_type __n) {
+			*this += __n;
+			return *this;
+
+		}
+		iterator operator-(difference_type __n) {
+			*this -= __n;
 			return *this;
 		}
 	};
-	std::list<operation_t> operations;
+	std::deque<operation_t> operations;
 
 	void syncIterator(iterator* it) {
 		representation_t rep = it->currentSequence->internals->representation;
@@ -386,11 +395,14 @@ protected:
 
 	void log_operation(operation_t op) {
 		operations.push_front(op);
-		attempt_adaptation();
+		if (operations.size() == 1000) {
+			attempt_adaptation();
+			operations.clear();
+		}
 	}
 	unsigned int represent_costs(representation_t rep) {
 		unsigned int result = 0, length = size();
-		for (std::list<operation_t>::iterator i = operations.begin(); i
+		for (std::deque<operation_t>::iterator i = operations.begin(); i
 				!= operations.end(); ++i) {
 			switch (internals->complexity(*i, rep)) {
 			case CONSTANT:
@@ -408,12 +420,13 @@ protected:
 	}
 	void attempt_adaptation() {
 		unsigned int length = size();
+		int operations_length = 1000;
 		float list_cost = (float) (represent_costs(LIST) + length)
-				/ operations.size();
+				/ operations_length;
 		float vector_cost = (float) (represent_costs(VECTOR) + length)
-				/ operations.size();
+				/ operations_length;
 		float deque_cost = (float) (represent_costs(deque) + length)
-				/ operations.size();
+				/ operations_length;
 		switch (internals->representation) {
 		case LIST:
 			if (vector_cost < list_cost || deque_cost < list_cost) {
@@ -1076,24 +1089,26 @@ public:
 			internals->contents.list->sort();
 			break;
 		case VECTOR:
-			std::sort(internals->contents.vector->begin(),internals->contents.vector->end());
+			std::sort(internals->contents.vector->begin(),
+					internals->contents.vector->end());
 			/* std::list<T> temp();
-			for(std::vector<T>::iterator i=internals->contents.vector->begin();i!=internals->contents.vector->end();i++)
-				temp.push_back(*i);
-			temp.sort();
-			for(int i=0;i<internals->contents.vector->size();i++)
-				internals->contents.vector->at(i) = temp[i];
-			log_operation(ITERATE);*/
+			 for(std::vector<T>::iterator i=internals->contents.vector->begin();i!=internals->contents.vector->end();i++)
+			 temp.push_back(*i);
+			 temp.sort();
+			 for(int i=0;i<internals->contents.vector->size();i++)
+			 internals->contents.vector->at(i) = temp[i];
+			 log_operation(ITERATE);*/
 			break;
 		case deque:
 			/*std::list<T> temp();
-			for(std::vector<T>::iterator i=internals->contents.deque->begin();i!=internals->contents.deque->end();i++)
-				temp.push_back(*i);
-			temp.sort();
-			for(int i=0;i<internals->contents.deque->size();i++)
-				internals->contents.deque->at(i) = temp[i];
-			log_operation(ITERATE);*/
-			std::sort(internals->contents.deque->begin(),internals->contents.deque->end());
+			 for(std::vector<T>::iterator i=internals->contents.deque->begin();i!=internals->contents.deque->end();i++)
+			 temp.push_back(*i);
+			 temp.sort();
+			 for(int i=0;i<internals->contents.deque->size();i++)
+			 internals->contents.deque->at(i) = temp[i];
+			 log_operation(ITERATE);*/
+			std::sort(internals->contents.deque->begin(),
+					internals->contents.deque->end());
 			break;
 		}
 		log_operation(SORT);

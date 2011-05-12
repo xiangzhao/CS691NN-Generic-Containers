@@ -24,7 +24,7 @@ template<typename T, class Allocator = std::allocator<T> > class AdaptiveSequenc
 protected:
 	int opsize;
 	enum representation_t {
-		LIST = 1, VECTOR = 2, deque = 3
+		LIST = 1, VECTOR = 2, DEQUE = 3
 	};
 	typedef struct {
 		std::list<T>* list;
@@ -45,9 +45,9 @@ protected:
 				contents.vector = new std::vector<T>();
 				representation = VECTOR;
 				break;
-			case deque:
+			case DEQUE:
 				contents.deque = new std::deque<T>();
-				representation = deque;
+				representation = DEQUE;
 				break;
 			}
 		}
@@ -59,7 +59,7 @@ protected:
 			case VECTOR:
 				delete contents.vector;
 				break;
-			case deque:
+			case DEQUE:
 				delete contents.deque;
 				break;
 			}
@@ -74,7 +74,7 @@ protected:
 				case VECTOR:
 					return LINEAR;
 					break;
-				case deque:
+				case DEQUE:
 					return LINEAR;
 					break;
 				}
@@ -93,7 +93,7 @@ protected:
 				case VECTOR:
 					return CONSTANT;
 					break;
-				case deque:
+				case DEQUE:
 					return LINEAR;
 					break;
 				}
@@ -109,7 +109,7 @@ protected:
 				case VECTOR:
 					return LINEAR;
 					break;
-				case deque:
+				case DEQUE:
 					return CONSTANT;
 					break;
 				}
@@ -122,7 +122,7 @@ protected:
 				case VECTOR:
 					return CONSTANT;
 					break;
-				case deque:
+				case DEQUE:
 					return CONSTANT;
 					break;
 				}
@@ -135,7 +135,7 @@ protected:
 				case VECTOR:
 					return CONSTANT;
 					break;
-				case deque:
+				case DEQUE:
 					return CONSTANT;
 					break;
 				}
@@ -198,7 +198,7 @@ public:
 			case VECTOR:
 				return *vector_random_access_iterator;
 				break;
-			case deque:
+			case DEQUE:
 				return *deque_random_access_iterator;
 				break;
 			}
@@ -214,7 +214,7 @@ public:
 				++vector_random_access_iterator;
 				vector_random_access_iterator_counter++;
 				break;
-			case deque:
+			case DEQUE:
 				++deque_random_access_iterator;
 				deque_random_access_iterator_counter++;
 				break;
@@ -232,7 +232,7 @@ public:
 				vector_random_access_iterator++;
 				vector_random_access_iterator_counter++;
 				break;
-			case deque:
+			case DEQUE:
 				deque_random_access_iterator++;
 				deque_random_access_iterator_counter++;
 				break;
@@ -247,7 +247,7 @@ public:
 			case VECTOR:
 				--vector_random_access_iterator;
 				break;
-			case deque:
+			case DEQUE:
 				--deque_random_access_iterator;
 				break;
 			}
@@ -261,7 +261,7 @@ public:
 			case VECTOR:
 				vector_random_access_iterator--;
 				break;
-			case deque:
+			case DEQUE:
 				deque_random_access_iterator--;
 				break;
 			}
@@ -278,7 +278,7 @@ public:
 				return vector_random_access_iterator
 						== __i.vector_random_access_iterator;
 				break;
-			case deque:
+			case DEQUE:
 				return deque_random_access_iterator
 						== __i.deque_random_access_iterator;
 				break;
@@ -295,7 +295,7 @@ public:
 				return vector_random_access_iterator
 						!= __i.vector_random_access_iterator;
 				break;
-			case deque:
+			case DEQUE:
 				return deque_random_access_iterator
 						!= __i.deque_random_access_iterator;
 				break;
@@ -312,7 +312,7 @@ public:
 				vector_random_access_iterator += __n;
 				vector_random_access_iterator_counter += __n;
 				break;
-			case deque:
+			case DEQUE:
 				deque_random_access_iterator += __n;
 				deque_random_access_iterator_counter += __n;
 				break;
@@ -331,7 +331,7 @@ public:
 				vector_random_access_iterator -= __n;
 				vector_random_access_iterator_counter -= __n;
 				break;
-			case deque:
+			case DEQUE:
 				deque_random_access_iterator -= __n;
 				deque_random_access_iterator_counter -= __n;
 				break;
@@ -365,8 +365,8 @@ public:
 				it->vector_random_access_iterator
 						= it->currentSequence->internals->contents.vector->begin();
 				break;
-			case deque:
-				it->tag = deque;
+			case DEQUE:
+				it->tag = DEQUE;
 				it->deque_random_access_iterator
 						= it->currentSequence->internals->contents.deque->begin();
 				break;
@@ -380,7 +380,7 @@ public:
 				it += it->vector_random_access_iterator_counter;
 				it->vector_random_access_iterator_counter = 0;
 				break;
-			case deque:
+			case DEQUE:
 				it += it->deque_random_access_iterator_counter;
 				it->deque_random_access_iterator_counter = 0;
 				break;
@@ -397,9 +397,10 @@ protected:
 
 	void log_operation(operation_t op) {
 		operations.push_front(op);
-		if (operations.size() == opsize) {
+		if (operations.size() >= opsize) {
 			attempt_adaptation();
 			operations.clear();
+			opsize = 100;
 		}
 	}
 	unsigned int represent_costs(representation_t rep) {
@@ -427,7 +428,7 @@ protected:
 				/ operations_length;
 		float vector_cost = (float) (represent_costs(VECTOR) + length)
 				/ operations_length;
-		float deque_cost = (float) (represent_costs(deque) + length)
+		float deque_cost = (float) (represent_costs(DEQUE) + length)
 				/ operations_length;
 		switch (internals->representation) {
 		case LIST:
@@ -445,7 +446,7 @@ protected:
 					delete internals;
 					internals = insides;
 				} else {
-					ContentsADT* insides = new ContentsADT(deque);
+					ContentsADT* insides = new ContentsADT(DEQUE);
 					std::cout << "ADAPT DEQUE" << std::endl;
 					insides->contents.deque->resize(length);
 					typename std::list<T, Allocator>::iterator iter =
@@ -460,6 +461,8 @@ protected:
 				syncIterators();
 				operations.clear();
 			}
+			else
+				opsize *= 2;
 			break;
 		case VECTOR:
 			if (list_cost < vector_cost || deque_cost < vector_cost) {
@@ -476,7 +479,7 @@ protected:
 					delete internals;
 					internals = insides;
 				} else {
-					ContentsADT* insides = new ContentsADT(deque);
+					ContentsADT* insides = new ContentsADT(DEQUE);
 					std::cout << "ADAPT DEQUE" << std::endl;
 					insides->contents.deque->resize(length);
 					for (int i = 0; i < length; i++)
@@ -488,8 +491,10 @@ protected:
 				syncIterators();
 				operations.clear();
 			}
+			else
+				opsize *= 2;
 			break;
-		case deque:
+		case DEQUE:
 			if (list_cost < deque_cost || vector_cost < deque_cost) {
 				if (list_cost < vector_cost) {
 					ContentsADT* insides = new ContentsADT(LIST);
@@ -516,10 +521,9 @@ protected:
 				syncIterators();
 				operations.clear();
 			}
+			else
+				opsize *= 2;
 			break;
-		default:
-			//Adapt the window size
-			opsize = 2 * opsize;
 		}
 	}
 	ContentsADT* internals;
@@ -549,7 +553,7 @@ public:
 	//			case VECTOR:
 	//				tag = 2;
 	//				break;
-	//			case deque:
+	//			case DEQUE:
 	//				tag = 3;
 	//				break;
 	//			}
@@ -686,7 +690,7 @@ public:
 			itebegin.vector_random_access_iterator
 					= this->internals->contents.vector->begin();
 			break;
-		case deque:
+		case DEQUE:
 			itebegin.deque_random_access_iterator
 					= this->internals->contents.deque->begin();
 			break;
@@ -705,7 +709,7 @@ public:
 			iteend.vector_random_access_iterator
 					= this->internals->contents.vector->end();
 			break;
-		case deque:
+		case DEQUE:
 			iteend.deque_random_access_iterator
 					= this->internals->contents.deque->end();
 			break;
@@ -731,7 +735,7 @@ public:
 		case VECTOR:
 			return internals->contents.vector->empty();
 			break;
-		case deque:
+		case DEQUE:
 			return internals->contents.deque->empty();
 			break;
 		}
@@ -745,7 +749,7 @@ public:
 		case VECTOR:
 			return internals->contents.vector->size();
 			break;
-		case deque:
+		case DEQUE:
 			return internals->contents.deque->size();
 			break;
 		}
@@ -758,7 +762,7 @@ public:
 		case VECTOR:
 			return internals->contents.vector->max_size();
 			break;
-		case deque:
+		case DEQUE:
 			return internals->contents.deque->max_size();
 			break;
 		}
@@ -771,7 +775,7 @@ public:
 		case VECTOR:
 			internals->contents.vector->resize(sz, c);
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->resize(sz, c);
 			break;
 		}
@@ -787,7 +791,7 @@ public:
 		case VECTOR:
 			return internals->contents.vector->front();
 			break;
-		case deque:
+		case DEQUE:
 			return internals->contents.deque->front();
 			break;
 		}
@@ -802,7 +806,7 @@ public:
 		case VECTOR:
 			return internals->contents.vector->front();
 			break;
-		case deque:
+		case DEQUE:
 			return internals->contents.deque->front();
 			break;
 		}
@@ -829,7 +833,7 @@ public:
 		case VECTOR:
 			return internals->contents.vector->at(n);
 			break;
-		case deque:
+		case DEQUE:
 			return internals->contents.deque->at(n);
 			break;
 		}
@@ -849,7 +853,7 @@ public:
 		case VECTOR:
 			return internals->contents.vector->at(n);
 			break;
-		case deque:
+		case DEQUE:
 			return internals->contents.deque->at(n);
 			break;
 		}
@@ -864,7 +868,7 @@ public:
 		case VECTOR:
 			internals->contents.vector->assign(first, last);
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->assign(first, last);
 			break;
 		}
@@ -878,7 +882,7 @@ public:
 		case VECTOR:
 			internals->contents.vector->assign(n, u);
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->assign(n, u);
 			break;
 		}
@@ -898,7 +902,7 @@ public:
 			internals->contents.vector->at(0) = x;
 			break;
 		}
-		case deque:
+		case DEQUE:
 			internals->contents.deque->push_front(x);
 			break;
 		}
@@ -912,7 +916,7 @@ public:
 		case VECTOR:
 			internals->contents.vector->pop_front();
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->pop_front();
 			break;
 		}
@@ -927,7 +931,7 @@ public:
 		case VECTOR:
 			internals->contents.vector->push_back(x);
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->push_back(x);
 			break;
 		}
@@ -942,7 +946,7 @@ public:
 		case VECTOR:
 			internals->contents.vector->pop_back();
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->pop_back();
 			break;
 		}
@@ -962,7 +966,7 @@ public:
 					= internals->contents.vector->insert(
 							position.vector_random_access_iterator, __x);
 			break;
-		case deque:
+		case DEQUE:
 			insresult.deque_random_access_iterator
 					= internals->contents.deque->insert(
 							position.deque_random_access_iterator, __x);
@@ -981,7 +985,7 @@ public:
 			internals->contents.vector->insert(
 					position.vector_random_access_iterator, n, __x);
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->insert(
 					position.deque_random_access_iterator, n, __x);
 			break;
@@ -999,7 +1003,7 @@ public:
 			internals->contents.vector->insert(
 					position.vector_random_access_iterator, first, last);
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->insert(
 					position.deque_random_access_iterator, first, last);
 			break;
@@ -1019,7 +1023,7 @@ public:
 					= internals->contents.vector->erase(
 							position.vector_random_access_iterator);
 			break;
-		case deque:
+		case DEQUE:
 			result.deque_random_access_iterator
 					= internals->contents.deque->erase(
 							position.deque_random_access_iterator);
@@ -1042,7 +1046,7 @@ public:
 							first.vector_random_access_iterator,
 							last.vector_random_access_iterator);
 			break;
-		case deque:
+		case DEQUE:
 			result.deque_random_access_iterator
 					= internals->contents.deque->erase(
 							first.deque_random_access_iterator,
@@ -1060,7 +1064,7 @@ public:
 		case VECTOR:
 			internals->contents.vector->clear();
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->clear();
 			break;
 		}
@@ -1079,7 +1083,7 @@ public:
 		case VECTOR:
 			internals->contents.vector->remove(value);
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->remove(value);
 			break;
 		}
@@ -1111,7 +1115,7 @@ public:
 			 internals->contents.vector->at(i) = temp[i];
 			 log_operation(ITERATE);*/
 			break;
-		case deque:
+		case DEQUE:
 			/*std::list<T> temp();
 			 for(std::vector<T>::iterator i=internals->contents.deque->begin();i!=internals->contents.deque->end();i++)
 			 temp.push_back(*i);
@@ -1135,7 +1139,7 @@ public:
 		case VECTOR:
 			internals->contents.vector->reverse();
 			break;
-		case deque:
+		case DEQUE:
 			internals->contents.deque->reverse();
 			break;
 		}
@@ -1149,7 +1153,7 @@ public:
 		case VECTOR:
 			std::cout << "VECTOR" << std::endl;
 			break;
-		case deque:
+		case DEQUE:
 			std::cout << "DEQUE" << std::endl;
 			break;
 		}

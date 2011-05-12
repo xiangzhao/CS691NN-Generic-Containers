@@ -149,7 +149,7 @@ void test2() {
 	clock_t t8 = clock();
 	std::cout << "Time for Vector: " << (float) (t8 - t7) << std::endl;
 }
-/* push back and then sort
+/* insert
  * Result: ad-deque-list-vector
  * Time:   2070000-40000-30000-3420000
  * The performance is better than vector. Fortunately it's not the worst, and it can correct

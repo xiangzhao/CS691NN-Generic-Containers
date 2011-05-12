@@ -2,11 +2,14 @@
 %% Do not edit unless you really know what you are doing.
 \documentclass[twocolumn,english,natbib]{sigplanconf}
 \usepackage[T1]{fontenc}
+\usepackage{array}
 
 \makeatletter
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% LyX specific LaTeX commands.
 \newcommand{\noun}[1]{\textsc{#1}}
+%% Because html converters don't know tabularnewline
+\providecommand{\tabularnewline}{\\}
 
 \makeatother
 
@@ -168,7 +171,9 @@ to our implementation of the adaptive sequence itself. To evaluate
 our adaptive sequence, we applied fixed workloads of method calls
 to each of the separate STL sequences supporting the relevant methods
 and to our adaptive sequence, and recorded the time taken by each
-data structure to perform the workload.
+data structure to perform the workload. All data elements for sequences
+were C++ \noun{int}'s, being the most convenient and compact data
+objects to create arbitrarily or at random.
 
 
 \subsection{Iteration 1: naive implementation}
@@ -179,7 +184,61 @@ data structure to perform the workload.
 
 \subsection{Iteration 3: further optimization}
 
+For the third iteration, we evaluated the performance of the various
+sequence data structures using three different workloads: a push\_back-push\_front
+workload of 1000000 elements, a push\_back-and-sort workload of 1000
+elements, and an insertion workload of 100,000 elements. Our operation-log
+size, the number of operations to log before checking whether to adapt,
+was initially set at 100, and if an adaptation was not performed after
+that many operations we doubled it.
 
+\begin{table}[tbh]
+\begin{tabular}{|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|}
+\hline 
+ & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector<int>\tabularnewline
+\hline 
+push\_back-push\_front: 1,000,000 elements & 370,000 ticks & 110,000 ticks & 430,000 ticks & N/A\tabularnewline
+\hline 
+\hline 
+push\_back-and-sort: 1,000 elements & 340,000 ticks & 960,000 ticks & 150,000 ticks & 340,000 ticks\tabularnewline
+\hline 
+insertions: 100,000 elements & 2,070,000 ticks & 40,000 ticks & 30,000 ticks & 3,420,000 ticks\tabularnewline
+\hline 
+\end{tabular}
+
+\caption{Performance evaluation results for Iteration 3}
+\end{table}
+
+
+In this iteration, we saw significant improvement in the performance
+of the adaptive sequence; it became competitive with one or more of
+the other data structures in every workload. 
+
+Our first (and largest) workload resulted in \noun{AdaptiveSequence<int>}
+taking 86.05\% the time of \noun{std::list<int>}, while taking 236.36\%
+the time of \noun{std::deque<int>}. \noun{std::vector<int>} does not
+support \noun{push\_back()} or \noun{push\_front()} operations natively,
+making this workload inapplicable to it and leaving \noun{AdaptiveSequence<int>}
+as a {}``winner'' over \noun{std::vector<int>} for this case. The
+adaptive sequence eventually adapts to an internal deque.
+
+In our second (and smallest) workload, \noun{AdaptiveSequence<int>}
+took 35.42\% as much time as \noun{std::deque<int>}, 126.67\% as much
+time as \noun{std::list<int>}, and the same amount of time as \noun{std::vector<int>}.
+No adaptation from the default internal data structure, an \noun{std::vector<int>},
+is recorded, despite the amenability of lists and deques to \noun{push\_back()}
+operations over vectors.
+
+In our third (and second-largest) workload, \noun{AdaptiveSequence<int>}
+took 5075\% the time of \noun{std::deque<int>}, 6800\% the time of
+\noun{std::list<int>}, and 60.53\% as much time as \noun{std::vector<int>}.
+An initial adaptation to an internal list was recorded, which seems
+incongruous with the failure to match \noun{std::list<int>} in performance.
+
+It would appear that this iteration of our adaptive sequence code
+still requires additional speed-ups to compete with the \emph{best}
+correctly-selected STL data structure, but manages to usually beat
+the worst selection of STL data structure.
 
 
 \section{Conclusions}

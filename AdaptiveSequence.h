@@ -8,6 +8,7 @@
 #ifndef ADAPTIVESEQUENCE_H_
 #define ADAPTIVESEQUENCE_H_
 
+#include <assert.h>
 #include <stdlib.h>
 #include <iostream>
 #include <cmath>
@@ -159,7 +160,7 @@ public:
 	typedef typename Allocator::size_type size_type;
 	typedef typename Allocator::difference_type difference_type;
 protected:
-	std::list<iterator*> iteratorList;
+	unsigned int iteratorVersion;
 public:
 	//typedef size_t size_type;
 	//typedef ptrdiff_t difference_type;
@@ -179,6 +180,7 @@ public:
 		int list_bidirectional_iterator_counter;
 		int vector_random_access_iterator_counter;
 		int deque_random_access_iterator_counter;
+		unsigned int iteratorVersion;
 		AdaptiveSequence* currentSequence;
 		representation_t tag;
 		iterator(AdaptiveSequence* sequence) {
@@ -187,9 +189,11 @@ public:
 			deque_random_access_iterator_counter = 0;
 			tag = sequence->internals->representation;
 			currentSequence = sequence;
-			sequence->iteratorList.push_back(this);
+			iteratorVersion = sequence->iteratorVersion;
 		}
 		reference operator*() {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			//			currentSequence->log_operation(ACCESS_ELEMENT);
 			switch (tag) {
 			case LIST:
@@ -205,6 +209,8 @@ public:
 		}
 
 		iterator& operator++() {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			switch (tag) {
 			case LIST:
 				++list_bidirectional_iterator;
@@ -223,6 +229,8 @@ public:
 		}
 		// It should be a new iterator
 		iterator operator++(int) {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			switch (tag) {
 			case LIST:
 				list_bidirectional_iterator++;
@@ -240,6 +248,8 @@ public:
 			return *this;
 		}
 		iterator& operator--() {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			switch (tag) {
 			case LIST:
 				--list_bidirectional_iterator;
@@ -254,6 +264,8 @@ public:
 			return *this;
 		}
 		iterator operator--(int) {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			switch (tag) {
 			case LIST:
 				list_bidirectional_iterator--;
@@ -269,6 +281,8 @@ public:
 		}
 
 		bool operator==(const iterator& __i) {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			switch (tag) {
 			case LIST:
 				return list_bidirectional_iterator
@@ -286,6 +300,8 @@ public:
 
 		}
 		bool operator!=(const iterator& __i) {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			switch (tag) {
 			case LIST:
 				return list_bidirectional_iterator
@@ -302,6 +318,8 @@ public:
 			}
 		}
 		iterator& operator+=(const difference_type& __n) {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			switch (tag) {
 			case LIST:
 				for (int k = 0; k < __n; k++)
@@ -321,6 +339,8 @@ public:
 			return *this;
 		}
 		iterator& operator-=(const difference_type& __n) {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			switch (tag) {
 			case LIST:
 				for (int k = 0; k < __n; k++)
@@ -340,11 +360,15 @@ public:
 			return *this;
 		}
 		iterator operator+(difference_type __n) {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			*this += __n;
 			return *this;
 
 		}
 		iterator operator-(difference_type __n) {
+			if(iteratorVersion < currentSequence->iteratorVersion)
+				currentSequence->syncIterator(this);
 			*this -= __n;
 			return *this;
 		}
@@ -352,6 +376,7 @@ public:
 	std::deque<operation_t> operations;
 
 	void syncIterator(iterator* it) {
+		it->iteratorVersion = iteratorVersion;
 		representation_t rep = it->currentSequence->internals->representation;
 		if (rep != it->tag) {
 			switch (rep) {
@@ -385,12 +410,6 @@ public:
 				it->deque_random_access_iterator_counter = 0;
 				break;
 			}
-		}
-	}
-	void syncIterators() {
-		for (typename std::list<iterator*>::iterator it = iteratorList.begin(); it
-				!= iteratorList.end(); ++it) {
-			syncIterator(*it);
 		}
 	}
 protected:
@@ -457,7 +476,7 @@ protected:
 					delete internals;
 					internals = insides;
 				}
-				syncIterators();
+				iteratorVersion++;
 				opsize = 100;
 				operations.clear();
 			} else
@@ -487,7 +506,7 @@ protected:
 					delete internals;
 					internals = insides;
 				}
-				syncIterators();
+				iteratorVersion++;
 				opsize = 100;
 				operations.clear();
 			} else
@@ -517,7 +536,7 @@ protected:
 					delete internals;
 					internals = insides;
 				}
-				syncIterators();
+				iteratorVersion++;
 				opsize = 100;
 				operations.clear();
 			} else
@@ -659,13 +678,14 @@ public:
 	//>>>>>>> refs/remotes/origin/master
 
 public:
-	AdaptiveSequence() {
+	AdaptiveSequence() : iteratorVersion(0) {
 		internals = new ContentsADT(VECTOR);
 		opsize = 100;
 	}
 	template<typename _InputIterator> AdaptiveSequence(_InputIterator first,
-			_InputIterator last) {
+			_InputIterator last) : iteratorVersion(0) {
 		internals = new ContentsADT(VECTOR);
+		delete internals->contents.vector;
 		internals->contents.vector = new std::vector<T>(first, last);
 		opsize = 100;
 
@@ -821,7 +841,7 @@ public:
 	const_reference at(size_type n) const {
 		log_operation(ACCESS_ELEMENT);
 		switch (internals->representation) {
-		case LIST:
+		case LIST: {
 			typename std::list<T, Allocator>::iterator iter =
 					internals->contents.list->begin();
 			for (int i = 0; i < n; i++)
@@ -829,6 +849,7 @@ public:
 			T& result = *iter;
 			return result;
 			break;
+		}
 		case VECTOR:
 			return internals->contents.vector->at(n);
 			break;
@@ -841,7 +862,7 @@ public:
 	reference at(size_type n) {
 		log_operation(ACCESS_ELEMENT);
 		switch (internals->representation) {
-		case LIST:
+		case LIST: {
 			typename std::list<T, Allocator>::iterator iter =
 					internals->contents.list->begin();
 			for (int i = 0; i < n; i++)
@@ -849,6 +870,7 @@ public:
 			T& result = *iter;
 			return result;
 			break;
+		}
 		case VECTOR:
 			return internals->contents.vector->at(n);
 			break;
@@ -880,6 +902,7 @@ public:
 			break;
 		case VECTOR:
 			internals->contents.vector->assign(n, u);
+			iteratorVersion++;
 			break;
 		case DEQUE:
 			internals->contents.deque->assign(n, u);
@@ -899,6 +922,7 @@ public:
 				internals->contents.vector->at(i + 1)
 						= internals->contents.vector->at(i);
 			internals->contents.vector->at(0) = x;
+			iteratorVersion++;
 			break;
 		}
 		case DEQUE:
@@ -914,6 +938,7 @@ public:
 			break;
 		case VECTOR:
 			internals->contents.vector->pop_front();
+			iteratorVersion++;
 			break;
 		case DEQUE:
 			internals->contents.deque->pop_front();
@@ -929,6 +954,7 @@ public:
 			break;
 		case VECTOR:
 			internals->contents.vector->push_back(x);
+			iteratorVersion++;
 			break;
 		case DEQUE:
 			internals->contents.deque->push_back(x);
@@ -944,6 +970,7 @@ public:
 			break;
 		case VECTOR:
 			internals->contents.vector->pop_back();
+			iteratorVersion++;
 			break;
 		case DEQUE:
 			internals->contents.deque->pop_back();
@@ -961,9 +988,11 @@ public:
 							position.list_bidirectional_iterator, __x);
 			break;
 		case VECTOR:
+			assert(position.tag == VECTOR);
 			insresult.vector_random_access_iterator
 					= internals->contents.vector->insert(
 							position.vector_random_access_iterator, __x);
+			iteratorVersion++;
 			break;
 		case DEQUE:
 			insresult.deque_random_access_iterator
@@ -983,6 +1012,7 @@ public:
 		case VECTOR:
 			internals->contents.vector->insert(
 					position.vector_random_access_iterator, n, __x);
+			iteratorVersion++;
 			break;
 		case DEQUE:
 			internals->contents.deque->insert(

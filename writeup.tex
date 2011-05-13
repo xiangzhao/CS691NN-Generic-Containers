@@ -176,16 +176,42 @@ data structure to perform the workload. All data elements for sequences
 were C++ \noun{int}'s, being the most convenient and compact data
 objects to create arbitrarily or at random.
 
+We ran the first two iterations of our tests on Ubuntu 10.04.2 LTS
+running on an Intel Core 2 Duo 2.53GHz, with 3072 kilobytes of cache,
+2048 megabytes of RAM and 2730 megabytes of swap space. The code was
+compiled with g++ (Ubuntu 4.4.3-4ubuntu5) 4.4.3.
+
 
 \subsection{Iteration 1: naive implementation}
 
+Our unoptimized code was unequivocally slow. We have included data
+only for the test workload that finished inside of 3 minutes.
 
-\subsection{Iteration 2: some optimization}
+\begin{table*}[tbh]
+\begin{tabular}{|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|}
+\hline 
+ & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector<int>\tabularnewline
+\hline 
+push\_back-and-sort: 1,000 elements & 750 milliseconds & 970 milliseconds & 140 milliseconds & 330 milliseconds\tabularnewline
+\hline 
+\end{tabular}
+
+\caption{\label{tab:Performance-evaluation-results-1}Performance evaluation
+results for Iteration 1}
+\end{table*}
 
 
-\subsection{Iteration 3: further optimization}
+As can be seen in Table \eqref{tab:Performance-evaluation-results-1},
+our \noun{AdaptiveSequence<int>} ran the workload in 77.32\% as much
+time as \noun{std::deque<int>}, 435.71\% as much time as \noun{std::list<int>},
+and 127.27\% as much time as \noun{std::vector<int>}. The adaptive
+sequence beats the worst-case STL sequence, but performs significantly
+worse than either of the other choices available.
 
-For the third iteration, we evaluated the performance of the various
+
+\subsection{Iteration 2, optimized}
+
+For the second iteration, we evaluated the performance of the various
 sequence data structures using three different workloads: a push\_back-push\_front
 workload of 1,000,000 elements, a push\_back-and-sort workload of
 1,000 elements, and an insertion workload of 100,000 elements. Our
@@ -193,27 +219,30 @@ operation-log size, the number of operations to log before checking
 whether to adapt, was initially set at 100, and if an adaptation was
 not performed after that many operations we doubled it.
 
-\begin{figure}[tbh]
-\begin{tabular}{|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|>{\centering}p{0.2\textwidth}|}
+\begin{table*}[tbh]
+\begin{tabular}{|>{\centering}p{0.15\textwidth}||>{\centering}p{0.2\textwidth}||>{\centering}p{0.2\textwidth}||>{\centering}p{0.2\textwidth}||>{\centering}p{0.15\textwidth}|}
 \hline 
- & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector<int>\tabularnewline
+\multicolumn{1}{|>{\centering}p{0.15\textwidth}|}{} & \multicolumn{1}{>{\centering}p{0.2\textwidth}|}{AdaptiveSequence<int>} & \multicolumn{1}{>{\centering}p{0.2\textwidth}|}{std::deque<int>} & \multicolumn{1}{>{\centering}p{0.2\textwidth}|}{std::list<int>} & std::vector<int>\tabularnewline
 \hline 
 push\_back-push\_front: 1,000,000 elements & 370 milliseconds & 110 milliseconds & 430 milliseconds & N/A\tabularnewline
 \hline 
 \hline 
 push\_back-and-sort: 1,000 elements & 340 milliseconds & 960 milliseconds & 150 milliseconds & 340 milliseconds\tabularnewline
 \hline 
+\hline 
 insertions: 100,000 elements & 2,070 milliseconds & 40 milliseconds & 30 milliseconds & 3,420 milliseconds\tabularnewline
 \hline 
 \end{tabular}
 
-\caption{Performance evaluation results for Iteration 3}
-\end{figure}
+\caption{\label{tab:Performance-evaluation-results}Performance evaluation
+results for Iteration 2}
+\end{table*}
 
 
 In this iteration, we saw significant improvement in the performance
 of the adaptive sequence; it became competitive with one or more of
-the other data structures in every workload. 
+the other data structures in every workload. The raw data can be found
+in Table \eqref{tab:Performance-evaluation-results-1}.
 
 Our first (and largest) workload resulted in \noun{AdaptiveSequence<int>}
 taking 86.05\% the time of \noun{std::list<int>}, while taking 236.36\%
@@ -239,23 +268,36 @@ incongruous with the failure to match \noun{std::list<int>} in performance.
 It would appear that this iteration of our adaptive sequence code
 still requires additional speed-ups to compete with the \emph{best}
 correctly-selected STL data structure, but manages to usually beat
-the worst selection of STL data structure.
+the worst selection of STL data structure and compete with the second-best
+choice.
+
+
+\subsection{Second benchmark: randomly-generated workloads}
+
+It is questionable whether our previous benchmark workloads truly
+and accurately represented the performance and ideal use-case of an
+adaptive sequence. Each workload consisted of large blocks of identical
+operations performed in a loop, and therefore could always have performed
+better when given a best-choice STL data structure. In real workloads
+driven by real large-scale programs, the sequence of operations performed
+on a data structure is not likely to be identical, and in fact will
+probably vary significantly. In that situation, the adaptivity functionality
+should aid performance more than it does in the uniform case.
+
+We thus wrote another benchmark workload that tests the adaptive sequence
+in this fashion. It generates a number of random sequence operations
+and then loops across this sequence, replaying it on each of the four
+possible sequences.
 
 
 \section{Discussion and Conclusions}
 
-
-\subsection{Realism of benchmarks}
-
-It is questionable whether our benchmark workloads truly and accurately
-represented the performance and ideal use-case of an adaptive sequence.
-Each workload consisted of large blocks of identical operations performed
-in a loop, and therefore could always have performed better when given
-a best-choice STL data structure. In real workloads driven by real
-large-scale programs, the sequence of operations performed on a data
-structure is not likely to be identical, and in fact will probably
-vary significantly. In that situation, the adaptivity functionality
-should aid performance more than it does in the uniform case.
+At this point, the adaptive sequence consistently manages to beat
+the worst-case STL sequence for performance, and often manages performance
+close to that of the second-best for a given workload. Given more
+optimization, it could achieve performance comparable to the best-choice
+data structure, but it should already be usable for environments in
+which the best-choice is difficult to determine.
 
 
 \subsection{Further possible adaptation techniques}

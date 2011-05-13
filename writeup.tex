@@ -112,6 +112,17 @@ neural-network using randomly-generated applications built by its
 useful in benchmarking our own adaptive sequences. Brainy achieved
 27\% and 33\% speed-ups on two different test machines.
 
+Earlier work has also been done on adapting the data structures used
+in a program to their workloads in the compiler. Bik and Wijshoff\cite{Bik1993}
+wrote an optimizing compiler that would convert matrix data structures
+into sparse representations for programmers. Even earlier on, Low
+and Rovner\cite{Low1976} built an experimental system for optimizing
+representations of lists, sets, and maps in an ALGOL-60-based programming
+language. An implementation of adaptive data structures very similar
+in goals to ours was later presented in Common Lisp by Wozniak, Daley,
+and Watt\cite{Wozniak2007}, which they termed \emph{dynamic abstract
+data types}.
+
 
 \section{Design and API support}
 
@@ -364,6 +375,20 @@ in Small Colleges}, volume 19, issue 1, pp 30-38, October 2003.
 
 \bibitem{ISO2009}Working Draft, Standard for Programming Language
 C++ (version of 2009-06-22), \emph{International Standards Organization},
-June 2009.\end{thebibliography}
+June 2009.
+
+\bibitem{Bik1993}Aart Bik, Harry Wijshoff. On Automatic Data Structure
+Selection and Code Generation for Sparse Computations. In \emph{Lecture
+Notes on Computer Science}, pp 57-75, 1993.
+
+\bibitem{Low1976}James Low and Paul Rovner. Techniques for the Automatic
+Selection of Data Structures. In \emph{Proceedings of the 3rd ACM
+SIGACT-SIGPLAN Symposium on Principles of Programming Languages},
+pp 58-67, 1976.
+
+\bibitem{Wozniak2007}Geoff Wozniak, Mark Daley, and Stephen Watt.
+Dynamic ADTs: a {}``don't ask, don't tell'' policy for data abstraction.
+In \emph{Proceedings of the 2007 International Lisp Conference}, article
+26, 12 pages, 2007.\end{thebibliography}
 
 \end{document}

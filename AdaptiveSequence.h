@@ -144,12 +144,8 @@ protected:
 		}
 	};
 public:
-	//<<<<<<< HEAD
-	//	struct ite;
 	void syncIterator();
-	//=======
 	struct iterator;
-	//>>>>>>> refs/remotes/origin/master
 	typedef Allocator allocator_type;
 	typedef typename Allocator::value_type value_type;
 	typedef typename Allocator::reference reference;
@@ -161,9 +157,6 @@ public:
 protected:
 	std::list<iterator*> iteratorList;
 public:
-	//typedef size_t size_type;
-	//typedef ptrdiff_t difference_type;
-	//Iterators
 	struct iterator {
 		typedef std::bidirectional_iterator_tag iterator_category;
 		typedef ptrdiff_t difference_type;
@@ -526,138 +519,6 @@ protected:
 		}
 	}
 	ContentsADT* internals;
-public:
-	//	typedef Allocator allocator_type;
-	//	typedef typename Allocator::value_type value_type;
-	//	typedef typename Allocator::reference reference;
-	//	typedef typename Allocator::const_reference const_reference;
-	//	typedef typename Allocator::pointer pointer;
-	//	typedef typename Allocator::const_pointer const_pointer;
-	//	typedef typename Allocator::size_type size_type;
-	//	typedef typename Allocator::difference_type difference_type;
-	//typedef size_t size_type;
-	//typedef ptrdiff_t difference_type;
-	//Iterators
-	//	struct iterator {
-	//		typename std::list<T>::iterator list_bidirectional_iterator;
-	//		typename std::vector<T>::iterator vector_random_access_iterator;
-	//		typename std::deque<T>::iterator deque_random_access_iterator;
-	//		AdaptiveSequence* currentSequence;
-	//		int tag;
-	//		iterator(AdaptiveSequence* sequence) {
-	//			switch (sequence->internals->representation) {
-	//			case LIST:
-	//				tag = 1;
-	//				break;
-	//			case VECTOR:
-	//				tag = 2;
-	//				break;
-	//			case DEQUE:
-	//				tag = 3;
-	//				break;
-	//			}
-	//
-	//		}
-	//		reference operator*() {
-	//			switch (tag) {
-	//			case 1:
-	//				return *list_bidirectional_iterator;
-	//				break;
-	//			case 2:
-	//				return *vector_random_access_iterator;
-	//				break;
-	//			case 3:
-	//				return *deque_random_access_iterator;
-	//				break;
-	//			}
-	//		}
-	//
-	//		iterator& operator++() {
-	//			switch (tag) {
-	//			case 1:
-	//				list_bidirectional_iterator++;
-	//				break;
-	//			case 2:
-	//				vector_random_access_iterator++;
-	//				break;
-	//			case 3:
-	//				deque_random_access_iterator++;
-	//				break;
-	//			}
-	//			return *this;
-	//		}
-	//		iterator& operator--() {
-	//			switch (tag) {
-	//			case 1:
-	//				list_bidirectional_iterator--;
-	//				break;
-	//			case 2:
-	//				vector_random_access_iterator--;
-	//				break;
-	//			case 3:
-	//				deque_random_access_iterator--;
-	//				break;
-	//			}
-	//			return *this;
-	//
-	//		}
-	//		bool operator==(const iterator& __i) {
-	//			switch (tag) {
-	//			case 1:
-	//				return list_bidirectional_iterator
-	//						== __i.list_bidirectional_iterator;
-	//				break;
-	//			case 2:
-	//				return vector_random_access_iterator
-	//						== __i.vector_random_access_iterator;
-	//				break;
-	//			case 3:
-	//				return deque_random_access_iterator
-	//						== __i.deque_random_access_iterator;
-	//				break;
-	//			}
-	//
-	//		}
-	//		bool operator!=(const iterator& __i) {
-	//			switch (tag) {
-	//			case 1:
-	//				return list_bidirectional_iterator
-	//						!= __i.list_bidirectional_iterator;
-	//				break;
-	//			case 2:
-	//				return vector_random_access_iterator
-	//						!= __i.vector_random_access_iterator;
-	//				break;
-	//			case 3:
-	//				return deque_random_access_iterator
-	//						!= __i.deque_random_access_iterator;
-	//				break;
-	//			}
-	//		}
-	//
-	//	};
-	//	typedef typename std::list<T>::iterator list_bidirectional_iterator;
-	//	typedef typename std::list<T>::const_iterator
-	//			const_list_bidirectonal_iterator;
-	//	typedef typename std::vector<T>::iterator vector_random_access_iterator;
-	//	typedef typename std::vector<T>::const_iterator
-	//			const_vector_random_access_iterator;
-	//	typedef typename std::deque<T>::iterator deque_random_access_iterator;
-	//	typedef typename std::deque<T>::const_iterator
-	//			const_deque_random_access_iterator;
-	//	typedef std::reverse_iterator<const_vector_random_access_iterator>
-	//			const_reverse_iterator;
-	//	typedef std::reverse_iterator<vector_random_access_iterator>
-	//			reverse_iterator;
-
-	//	void syncIterator(iterator* it) {
-	//		representation_t rep = it->currentSequence->internals->representation;
-	//		int tag = it->tag;
-	//		//		switch ();
-	//
-	//	}
-	//>>>>>>> refs/remotes/origin/master
-
 public:
 	AdaptiveSequence() {
 		internals = new ContentsADT(VECTOR);

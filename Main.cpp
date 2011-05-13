@@ -1,68 +1,9 @@
-///*
-// * Main.cpp
-// *
-// *  Created on: Apr 11, 2011
-// *      Author: Xiang Zhao
-// */
-//#include <iostream>
-//#include <vector>
-//#include "ad_algorithm.h"
-//int main() {
-//	//	char* pch = "Hello";
-//	//	std::cout << *(pch + 1) << std::endl;
-//	int t[5] = { 2, 4, 6, 8, 10 };
-//	AdaptiveSequence<int> ads;
-//	ads.push_back(5);
-//	ads.push_back(6);
-//	ads.push_back(7);
-//	AdaptiveSequence<int>::iterator iterator1 = ads.begin();
-//	iterator1++;
-//	ads.insert(iterator1, t, t + 4);
-//	//	ads.insert(iterator1, 3, 25);
-//	//	it++;
-//	//	std::cout << *it << std::endl;
-//	//	AdaptiveSequence<int>::iterator ite = ads.erase(it);
-//	//	std::cout << *ite << std::endl;
-//	//	std::cout << *it << std::endl;
-//	//	ads.push_back(8);
-//	std::cout << *(iterator1) << std::endl;
-//	AdaptiveSequence<int>::iterator iterator2 = ads.begin();
-//	AdaptiveSequence<int>::iterator iterator3 = ads.end();
-//	iterator2++;
-//	iterator3--;
-//	iterator3--;
-//	ads.erase(iterator2, iterator3);
-//	std::cout << "-------" << std::endl;
-//
-//	//	AdaptiveSequence<int>::ite iterator = ads.begin();
-//	//	AdaptiveSequence<int>::ite iteratorend = ads.end();
-//	//	std::vector<int>::iterator resultite = std::find(
-//	//			iterator.vector_random_access_iterator,
-//	//			iteratorend.vector_random_access_iterator, 6);
-//	for (AdaptiveSequence<int>::iterator iterator = ads.begin(); iterator
-//			!= ads.end(); ++iterator) {
-//		std::cout << *iterator << std::endl;
-//	}
-//	//	AdaptiveSequence<int>::iterator result = adalgorithm::find(ads.begin(),
-//	//			ads.end(), 6);
-//	//	AdaptiveSequence<int>::iterator result = std::find(ads.begin(), ads.end(),
-//	//			6);
-//	//
-//	//	std::cout << *(result++) << std::endl;
-//
-//	//	ads.getInternals();
-//	//	for (int i = 0; i < 10000; i++)
-//	//		ads.push_front(i);
-//	//	ads.getInternals();
-//	//	std::cout << *resultite << std::endl;
-//	//	std::cout << *iterator << std::endl;
-//	//	ads.getInternals();
-//	//	std::cout << *(++iterator) << std::endl;
-//	//	std::cout << *(++iterator) << std::endl;
-//	//	std::cout << *--iteratorend << std::endl;
-//
-//	return 0;
-//}
+/*
+ * Main.cpp
+ *
+ *  Created on: Apr 11, 2011
+ *      Author: Xiang Zhao
+ */
 #include <vector>
 #include <list>
 #include <iostream>
@@ -222,7 +163,6 @@ void test4() {
 	//	AdaptiveSequence test.
 	AdaptiveSequence<int> adsequence(t, t + 10);
 	AdaptiveSequence<int>::iterator ait = adsequence.begin();
-	//	ait++;
 	clock_t t1 = clock();
 	for (std::list<random_operation_t>::iterator iop = ops.begin(); iop
 			!= ops.end(); iop++) {
@@ -250,7 +190,6 @@ void test4() {
 	//std::deque test
 	std::deque<int> d(t, t + 10);
 	std::deque<int>::iterator dit = d.begin();
-	//	dit++;
 	clock_t t3 = clock();
 	for (std::list<random_operation_t>::iterator iop = ops.begin(); iop
 			!= ops.end(); iop++) {
@@ -278,7 +217,6 @@ void test4() {
 	//std::list test
 	std::list<int> l(t, t + 10);
 	std::list<int>::iterator lit = l.begin();
-	//	lit++;
 	clock_t t5 = clock();
 	for (std::list<random_operation_t>::iterator iop = ops.begin(); iop
 			!= ops.end(); iop++) {
@@ -309,7 +247,6 @@ void test4() {
 	//std::vector test
 	std::vector<int> v(t, t + 10);
 	std::vector<int>::iterator vit = v.begin();
-	//	vit++;
 	clock_t t7 = clock();
 	for (std::list<random_operation_t>::iterator iop = ops.begin(); iop
 			!= ops.end(); iop++) {
@@ -337,19 +274,10 @@ void test4() {
 
 int main() {
 	std::cout << "Clock ticks per second: " << CLOCKS_PER_SEC << std::endl;
-	//	test1();
-	//	test2();
-	//	test3();
-	//	for(int i=0;i<3;i++)
+	test1();
+	test2();
+	test3();
 	test4();
-	//	int t[4] = { 1, 2, 3, 4 };
-
-	//	AdaptiveSequence<int> l(t, t + 4);
-	//	l.push_back(4);
-	//	l.push_back(3);
-	//	l.push_back(7);
-	//	l.sort();
-	//	for (AdaptiveSequence<int>::iterator it = l.begin(); it != l.end(); it++)
-	//		std::cout << *it << std::endl;
+	return 0;
 }
 

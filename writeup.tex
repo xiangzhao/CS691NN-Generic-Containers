@@ -272,20 +272,32 @@ the worst selection of STL data structure and compete with the second-best
 choice.
 
 
+\subsection{Second benchmark: randomly-generated workloads}
+
+It is questionable whether our previous benchmark workloads truly
+and accurately represented the performance and ideal use-case of an
+adaptive sequence. Each workload consisted of large blocks of identical
+operations performed in a loop, and therefore could always have performed
+better when given a best-choice STL data structure. In real workloads
+driven by real large-scale programs, the sequence of operations performed
+on a data structure is not likely to be identical, and in fact will
+probably vary significantly. In that situation, the adaptivity functionality
+should aid performance more than it does in the uniform case.
+
+We thus wrote another benchmark workload that tests the adaptive sequence
+in this fashion. It generates a number of random sequence operations
+and then loops across this sequence, replaying it on each of the four
+possible sequences.
+
+
 \section{Discussion and Conclusions}
 
-
-\subsection{Realism of benchmarks}
-
-It is questionable whether our benchmark workloads truly and accurately
-represented the performance and ideal use-case of an adaptive sequence.
-Each workload consisted of large blocks of identical operations performed
-in a loop, and therefore could always have performed better when given
-a best-choice STL data structure. In real workloads driven by real
-large-scale programs, the sequence of operations performed on a data
-structure is not likely to be identical, and in fact will probably
-vary significantly. In that situation, the adaptivity functionality
-should aid performance more than it does in the uniform case.
+At this point, the adaptive sequence consistently manages to beat
+the worst-case STL sequence for performance, and often manages performance
+close to that of the second-best for a given workload. Given more
+optimization, it could achieve performance comparable to the best-choice
+data structure, but it should already be usable for environments in
+which the best-choice is difficult to determine.
 
 
 \subsection{Further possible adaptation techniques}

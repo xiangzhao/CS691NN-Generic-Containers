@@ -270,6 +270,20 @@ results for Iteration 2}
 \end{center}
 \end{table*}
 
+\begin{table*}[tbh]
+\begin{center}
+    \begin{tabular}{ | c | c | c | c | c |}
+    \hline
+ & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector\\ \hline
+First run: & 2,510 milliseconds & 7,600 milliseconds & 2,120 milliseconds & 2,490 milliseconds\\ \hline
+Second run: & 2,450 milliseconds & 7,020 milliseconds & 2,100 milliseconds & 2,430 milliseconds\\ \hline
+Third run: & 2,540 milliseconds & 7,350 milliseconds & 2,140 milliseconds & 2,580 milliseconds\\ \hline
+Average: & 2,500 milliseconds & 7,323 milliseconds & 2,120 milliseconds & 2,500 milliseconds\\ \hline
+\end{tabular}
+\caption{\label{tab:Performance-evaluation-results}Performance evaluation
+results for randomly generated operations}
+\end{center}
+\end{table*}
 
 In this iteration, we saw significant improvement in the performance
 of the adaptive sequence; it became competitive with one or more of
@@ -311,21 +325,6 @@ choice.
 
 \subsection{Second benchmark: randomly-generated workloads}
 
-\begin{table*}[tbh]
-\begin{center}
-    \begin{tabular}{ | c | c | c | c | c |}
-    \hline
- & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector\\ \hline
-First run: & 2,510 milliseconds & 7,600 milliseconds & 2,120 milliseconds & 2,490 milliseconds\\ \hline
-Second run: & 2,450 milliseconds & 7,020 milliseconds & 2,100 milliseconds & 2,430 milliseconds\\ \hline
-Third run: & 2,540 milliseconds & 7,350 milliseconds & 2,140 milliseconds & 2,580 milliseconds\\ \hline
-Average: & 2,500 milliseconds & 7,323 milliseconds & 2,120 milliseconds & 2,500 milliseconds\\ \hline
-\end{tabular}
-\caption{\label{tab:Performance-evaluation-results}Performance evaluation
-results for randomly generated operations}
-\end{center}
-\end{table*}
-
 It is questionable whether our previous benchmark workloads truly
 and accurately represented the performance and ideal use-case of an
 adaptive sequence. Each workload consisted of large blocks of identical
@@ -347,7 +346,7 @@ took 34.14\% the time of \noun{std::deque<int>}, 118\% the time of
 \noun{std::list<int>}, and 100\% as much time as \noun{std::vector<int>}. 
 We see the performance of our adaptive sequence is pretty much the same 
 as the vector and list. That is because there 
-is no adaptation recorded and it is clearly that the default internal data structure \noun{std::vector<int>} is considered to have better performance under those random operations. However, the dequeue performs the worst probably because the operations involve many insertions
+is no adaptation recorded and the default internal data structure \noun{std::vector<int>} is considered to have better performance under those random operations. However, the dequeue performs the worst probably because the operations involve many insertions
 and sorting.
 
 

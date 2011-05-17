@@ -20,7 +20,7 @@
 \CopyrightYear{2011}
 
 
-\title{Adaptivity in STL Sequence Data Structures}
+\title{Adaptivity in STL sequence data structures}
 
 
 \authorinfo{Eli Gottlieb\and Xiang Zhao}{University of Massachusetts Amherst}{egottlie@student.umass.edu\\
@@ -96,10 +96,14 @@ time complexity.
 
 Liu et al\cite{Liu2009} found that choosing the right STL data structure
 can result in as much as a 17\% speed improvement, with many smaller
-improvements being found. Their code analyzer did not allow for generic
-treatment of sequences without regard to their implementation but
-required that the code only employ the methods shared between all
-the STL sequence classes.
+improvements being found. In contrast to our adaptive sequence, their
+code analyzer did not allow for generic treatment of sequences without
+regard to their implementation but required that the code only employ
+the methods shared between all the STL sequence classes. It also did
+not actually choose an appropriate data structure for its user, merely
+giving advice, and its analysis was done based on a set of preprogrammed
+patterns and a preprogrammed C++ performance model rather than using
+asymptotic analysis as we have.
 
 A group of researchers set out to use machine-learning techniques
 to decide what data structure should be used where, producing software
@@ -118,22 +122,35 @@ wrote an optimizing compiler that would convert matrix data structures
 into sparse representations for programmers. Even earlier on, Low
 and Rovner\cite{Low1976} built an experimental system for optimizing
 representations of lists, sets, and maps in an ALGOL-60-based programming
-language. An implementation of adaptive data structures very similar
-in goals to ours was later presented in Common Lisp by Wozniak, Daley,
-and Watt\cite{Wozniak2007}, which they termed \emph{dynamic abstract
-data types}.
+language. They counted machine instructions and weighted them by their
+execution times across each data-structure method in their library,
+better accounting for lower-order costs than our asymptotic analysis
+but requiring more work in programming and analysis by humans.
+
+An implementation of adaptive data structures very similar in goals
+to ours was later presented in Common Lisp by Wozniak, Daley, and
+Watt\cite{Wozniak2007}, which they termed \emph{dynamic abstract
+data types}. They took an approach similar to Liu et al by employing
+a monitor and knowledge base that looked for patterns in the performance
+profile of an ADT representation when the interface methods (the operations
+publicly exposed on the ADT) are called, although they also appear
+to have tracked each actual operation as we have.
 
 
 \section{Design and API support}
 
 Our adaptive sequence supports most of the combined method set of
 \noun{std::list<T>}, \noun{std::vector<T>}, and \noun{std::deque<T>}.
-It currently only lacks a small number of methods and the production
-of random-access iterators rather than bidirectional iterators. It
-can therefore be used as an imperfect but workable drop-in replacement
-for many, if not most, uses of STL sequences. The STL does not specify
-a particular concept or interface for any of its sequence data structures,
-and this has prevented us from producing a genuine drop-in replacement.
+It currently only lacks a small number of methods due to implementation
+time-constraints (these can be added given more coding time) and the
+production of random-access iterators rather than bidirectional iterators.
+It can therefore be used as an imperfect but workable drop-in replacement
+for many, if not most, uses of STL sequences. However, the STL does
+not specify any particular concept or abstract superclass (interface)
+for its sequence data structures, and thus producing a drop-in replacement
+for the STL sequences requires carefully reimplementing every single
+method of every STL sequence class rather than merely extending a
+preexisting class and overriding its virtual methods.
 
 The adaptive sequence logs the methods called upon it, and also keeps
 track of the log's length. When the log reaches a certain length \emph{n},
@@ -151,28 +168,38 @@ within the sequence.
 
 The internal STL vector, list, or deque itself is stored as a tagged
 variant, on which tag switching is done to execute methods upon the
-internal data structure. This means that rather than implementing
-the internal sequences ourselves, we wrap around the highly-optimized
-STL implementations in order to focus our primary efforts on the adaptation
-machinery itself. When an STL data structure does not provide a method
-we provide, such as the \noun{sort()} method, we copy out the elements
-of our sequence into an alternative that \emph{does} support that
-method, run the method on that temporary data structure, copy the
-contents back into our original (if mutation could have occurred),
-and return the relevant result -- logging all the necessary sequence
-operations to account for the performance penalty at adaptation-time.
+internal data structure. This representation was chosen because although
+tagged variants are inelegant in C++, the alternative would have been
+to write a wrapper class for each of the three STL sequences and an
+abstract superclass for them to extend, significantly increasing the
+size of our code-base (and thus the size of resulting binaries). This
+means that rather than implementing the internal sequences ourselves,
+we wrap around the highly-optimized STL implementations in order to
+focus our primary efforts on the adaptation machinery itself. When
+an STL data structure does not provide a method we provide, such as
+the \noun{sort()} method, we copy out the elements of our sequence
+into an alternative that \emph{does} support that method, run the
+method on that temporary data structure, copy the contents back into
+our original (if mutation could have occurred), and return the relevant
+result -- logging all the necessary sequence operations to account
+for the performance penalty at adaptation-time.
 
 The drawback to our API implementation is that, since we only support
 bidirectional iterators rather than random-access iterators, a number
 of the STL \emph{algorithms} (a misnomer, as these are templated library
 functions implementing common algorithms rather than just theoretical
-algorithms) do not work on the adaptive sequence at this time. Each
-iterator operation can also only count for a single constant-time
-operation alone. Such operations are not logged because this would
-result in logging N constant-time \noun{ACCESS\_ELEMENT} operations
-for a full iteration over a sequence of N elements rather than logging
-an \noun{ITERATE\_OVER} operation. This would throw off the accuracy
-of our amortized-complexity calculations.
+algorithms) do not work on the adaptive sequence at this time. Implementing
+a random-access iterator would require that we add functionality to
+the internal list and deque iterators to remember the index where
+the iterator \emph{should} be and walk there from the beginning for
+each random-access, since insertions or deletions may have changed
+where the iterator \emph{actually is} in the sequence relative to
+its stored index. Each iterator operation can also only count for
+a single constant-time operation alone. Such operations are not logged
+because this would result in logging N constant-time \noun{ACCESS\_ELEMENT}
+operations for a full iteration over a sequence of N elements rather
+than logging an \noun{ITERATE\_OVER} operation. This would throw off
+the accuracy of our amortized-complexity calculations.
 
 
 \section{Performance evaluation}
@@ -199,15 +226,16 @@ Our unoptimized code was unequivocally slow. We have included data
 only for the test workload that finished inside of 3 minutes.
 
 \begin{table*}[tbh]
-\begin{center}
-    \begin{tabular}{ | p{5cm} | c | c | c | c |}
-    \hline
- & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector<int>\\ \hline 
-push\_back-and-sort: 1,000 elements & 750 milliseconds & 970 milliseconds & 140 milliseconds & 330 milliseconds\\ \hline
-    \end{tabular}
+\begin{tabular}{|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|}
+\hline 
+ & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector<int>\tabularnewline
+\hline 
+push\_back-and-sort: 1,000 elements & 750 milliseconds & 970 milliseconds & 140 milliseconds & 330 milliseconds\tabularnewline
+\hline 
+\end{tabular}
+
 \caption{\label{tab:Performance-evaluation-results-1}Performance evaluation
 results for Iteration 1}
-\end{center}
 \end{table*}
 
 
@@ -230,17 +258,22 @@ whether to adapt, was initially set at 100, and if an adaptation was
 not performed after that many operations we doubled it.
 
 \begin{table*}[tbh]
-\begin{center}
-    \begin{tabular}{ | p{5cm} | c | c | c | c |}
-    \hline
- & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector\\ \hline
-push\_back-push\_front: 1,000,000 elements & 370 milliseconds & 110 milliseconds & 430 milliseconds & N/A\\ \hline
-push\_back-and-sort: 1,000 elements & 340 milliseconds & 960 milliseconds & 150 milliseconds & 340 milliseconds\\ \hline
-insertions: 100,000 elements & 2,070 milliseconds & 40 milliseconds & 30 milliseconds & 3,420 milliseconds\\ \hline
-    \end{tabular}
+\begin{tabular}{|>{\centering}p{0.15\textwidth}||>{\centering}p{0.2\textwidth}||>{\centering}p{0.2\textwidth}||>{\centering}p{0.2\textwidth}||>{\centering}p{0.15\textwidth}|}
+\hline 
+\multicolumn{1}{|>{\centering}p{0.15\textwidth}|}{} & \multicolumn{1}{>{\centering}p{0.2\textwidth}|}{AdaptiveSequence<int>} & \multicolumn{1}{>{\centering}p{0.2\textwidth}|}{std::deque<int>} & \multicolumn{1}{>{\centering}p{0.2\textwidth}|}{std::list<int>} & std::vector<int>\tabularnewline
+\hline 
+push\_back-push\_front: 1,000,000 elements & 370 milliseconds & 110 milliseconds & 430 milliseconds & N/A\tabularnewline
+\hline 
+\hline 
+push\_back-and-sort: 1,000 elements & 340 milliseconds & 960 milliseconds & 150 milliseconds & 340 milliseconds\tabularnewline
+\hline 
+\hline 
+insertions: 100,000 elements & 2,070 milliseconds & 40 milliseconds & 30 milliseconds & 3,420 milliseconds\tabularnewline
+\hline 
+\end{tabular}
+
 \caption{\label{tab:Performance-evaluation-results}Performance evaluation
 results for Iteration 2}
-\end{center}
 \end{table*}
 
 
@@ -269,6 +302,11 @@ took 5075\% the time of \noun{std::deque<int>}, 6800\% the time of
 \noun{std::list<int>}, and 60.53\% as much time as \noun{std::vector<int>}.
 An initial adaptation to an internal list was recorded, which seems
 incongruous with the failure to match \noun{std::list<int>} in performance.
+Our results here are most likely due to bugs in the code, an adaptation
+to a vector erroneously not printed to the terminal, or possibly a
+bug in the iterator code performing a linear scan across the sequence
+(which would make the adaptive sequence comparable in performance
+to a vector).
 
 It would appear that this iteration of our adaptive sequence code
 still requires additional speed-ups to compete with the \emph{best}
@@ -278,20 +316,6 @@ choice.
 
 
 \subsection{Second benchmark: randomly-generated workloads}
-
-\begin{table*}[tbh]
-\begin{center}
-    \begin{tabular}{ | c | c | c | c | c |}
-    \hline
- & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector\\ \hline
-First run: & 2,510 milliseconds & 7,600 milliseconds & 2,120 milliseconds & 2,490 milliseconds\\ \hline
-Second run: & 2,450 milliseconds & 7,020 milliseconds & 2,100 milliseconds & 2,430 milliseconds\\ \hline
-Third run: & 2,540 milliseconds & 7,350 milliseconds & 2,140 milliseconds & 2,580 milliseconds\\ \hline
-\end{tabular}
-\caption{\label{tab:Performance-evaluation-results}Performance evaluation
-results for randomly generated operations}
-\end{center}
-\end{table*}
 
 It is questionable whether our previous benchmark workloads truly
 and accurately represented the performance and ideal use-case of an
@@ -304,11 +328,15 @@ probably vary significantly. In that situation, the adaptivity functionality
 should aid performance more than it does in the uniform case.
 
 We thus wrote another benchmark workload that tests the adaptive sequence
-in this fashion. It generates 10,000 random sequence operations
+in this fashion. It generates a number of random sequence operations
 and then loops across this sequence, replaying it on each of the four
-possible sequences.The operations are push back, insert, sort, and random access. 
+possible sequences. The operations are push back, insert, sort, and
+random access.
 
-In this final benchmark, We see the performance of our adaptive sequence is pretty much the same with the vector and list. However, the dequeue performs the worst probably because the operations invovle many insertions and sorting. 
+In this final benchmark, we see the performance of our adaptive sequence
+is pretty much the same with the vector and list. However, the dequeue
+performs the worst probably because the operations involve many insertions
+and sorting.
 
 
 \section{Discussion and Conclusions}
@@ -339,20 +367,21 @@ In order to reduce the overhead of deciding when and how to adapt,
 and of the actual adaptation, we could reengineer the internals of
 the adaptive sequence to decide these matters using probabilistic
 reasoning. The adaptive sequence would have counters for each kind
-of operation, each initialized to 1, and would count operations the
-operations it has performed. Rather than keeping a log of each operation,
-we would log the kind of operation by simply incrementing its counter.
-Upon logging \emph{n} operations and with \emph{K} kinds of operations,
-we would adapt by calculating the probability \emph{P(k)} that a given
-operation will be of kind \emph{k} as: 
+of operation, each initialized to 0, and would count the operations
+it has performed. Rather than keeping a log of each operation, we
+would log the kind of operation \emph{k} by simply incrementing its
+counter, \emph{C(k)}. Upon logging \emph{n} operations, we would adapt
+by calculating the probability \emph{P(k)} that a given operation
+will be of kind \emph{k} as: 
 \[
-P(k)=\frac{C(k)}{n+K}
+P(k)=\frac{C(k)}{n}
 \]
- Using those probabilities, we could reconstruct a summed-up workload
-of \emph{n} operations and calculate its costs for each internal data
-structure. For an internal data structure \emph{rep}, an operation
-kind \emph{k} with probability \emph{P(k)}, and \emph{n} operations,
-we would find: 
+ These calculations would give us a probability distribution for the
+different kinds of operations. We could use that distribution to reconstruct
+a summed-up workload of \emph{n} operations and calculate its costs
+for each internal data structure. For an internal data structure \emph{rep},
+an operation kind \emph{k} with probability \emph{P(k)}, and \emph{n}
+operations, we would find: 
 \[
 \underset{k}{\sum}nP(k)cost(k,rep)
 \]

@@ -20,7 +20,7 @@
 \CopyrightYear{2011}
 
 
-\title{Adaptivity in STL sequence data structures}
+\title{Adaptivity in STL Sequence Data Structures}
 
 
 \authorinfo{Eli Gottlieb\and Xiang Zhao}{University of Massachusetts Amherst}{egottlie@student.umass.edu\\
@@ -226,16 +226,15 @@ Our unoptimized code was unequivocally slow. We have included data
 only for the test workload that finished inside of 3 minutes.
 
 \begin{table*}[tbh]
-\begin{tabular}{|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|>{\centering}p{0.15\linewidth}|}
-\hline 
- & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector<int>\tabularnewline
-\hline 
-push\_back-and-sort: 1,000 elements & 750 milliseconds & 970 milliseconds & 140 milliseconds & 330 milliseconds\tabularnewline
-\hline 
-\end{tabular}
-
+\begin{center}
+    \begin{tabular}{ | p{5cm} | c | c | c | c |}
+    \hline
+ & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector<int>\\ \hline 
+push\_back-and-sort: 1,000 elements & 750 milliseconds & 970 milliseconds & 140 milliseconds & 330 milliseconds\\ \hline
+    \end{tabular}
 \caption{\label{tab:Performance-evaluation-results-1}Performance evaluation
 results for Iteration 1}
+\end{center}
 \end{table*}
 
 
@@ -258,22 +257,17 @@ whether to adapt, was initially set at 100, and if an adaptation was
 not performed after that many operations we doubled it.
 
 \begin{table*}[tbh]
-\begin{tabular}{|>{\centering}p{0.15\textwidth}||>{\centering}p{0.2\textwidth}||>{\centering}p{0.2\textwidth}||>{\centering}p{0.2\textwidth}||>{\centering}p{0.15\textwidth}|}
-\hline 
-\multicolumn{1}{|>{\centering}p{0.15\textwidth}|}{} & \multicolumn{1}{>{\centering}p{0.2\textwidth}|}{AdaptiveSequence<int>} & \multicolumn{1}{>{\centering}p{0.2\textwidth}|}{std::deque<int>} & \multicolumn{1}{>{\centering}p{0.2\textwidth}|}{std::list<int>} & std::vector<int>\tabularnewline
-\hline 
-push\_back-push\_front: 1,000,000 elements & 370 milliseconds & 110 milliseconds & 430 milliseconds & N/A\tabularnewline
-\hline 
-\hline 
-push\_back-and-sort: 1,000 elements & 340 milliseconds & 960 milliseconds & 150 milliseconds & 340 milliseconds\tabularnewline
-\hline 
-\hline 
-insertions: 100,000 elements & 2,070 milliseconds & 40 milliseconds & 30 milliseconds & 3,420 milliseconds\tabularnewline
-\hline 
-\end{tabular}
-
+\begin{center}
+    \begin{tabular}{ | p{5cm} | c | c | c | c |}
+    \hline
+ & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector\\ \hline
+push\_back-push\_front: 1,000,000 elements & 370 milliseconds & 110 milliseconds & 430 milliseconds & N/A\\ \hline
+push\_back-and-sort: 1,000 elements & 340 milliseconds & 960 milliseconds & 150 milliseconds & 340 milliseconds\\ \hline
+insertions: 100,000 elements & 2,070 milliseconds & 40 milliseconds & 30 milliseconds & 3,420 milliseconds\\ \hline
+    \end{tabular}
 \caption{\label{tab:Performance-evaluation-results}Performance evaluation
 results for Iteration 2}
+\end{center}
 \end{table*}
 
 
@@ -317,6 +311,21 @@ choice.
 
 \subsection{Second benchmark: randomly-generated workloads}
 
+\begin{table*}[tbh]
+\begin{center}
+    \begin{tabular}{ | c | c | c | c | c |}
+    \hline
+ & AdaptiveSequence<int> & std::deque<int> & std::list<int> & std::vector\\ \hline
+First run: & 2,510 milliseconds & 7,600 milliseconds & 2,120 milliseconds & 2,490 milliseconds\\ \hline
+Second run: & 2,450 milliseconds & 7,020 milliseconds & 2,100 milliseconds & 2,430 milliseconds\\ \hline
+Third run: & 2,540 milliseconds & 7,350 milliseconds & 2,140 milliseconds & 2,580 milliseconds\\ \hline
+Average: & 2,500 milliseconds & 7,323 milliseconds & 2,120 milliseconds & 2,500 milliseconds\\ \hline
+\end{tabular}
+\caption{\label{tab:Performance-evaluation-results}Performance evaluation
+results for randomly generated operations}
+\end{center}
+\end{table*}
+
 It is questionable whether our previous benchmark workloads truly
 and accurately represented the performance and ideal use-case of an
 adaptive sequence. Each workload consisted of large blocks of identical
@@ -333,9 +342,12 @@ and then loops across this sequence, replaying it on each of the four
 possible sequences. The operations are push back, insert, sort, and
 random access.
 
-In this final benchmark, we see the performance of our adaptive sequence
-is pretty much the same with the vector and list. However, the dequeue
-performs the worst probably because the operations involve many insertions
+In this final benchmark, in average our \noun{AdaptiveSequence<int>}
+took 34.14\% the time of \noun{std::deque<int>}, 118\% the time of
+\noun{std::list<int>}, and 100\% as much time as \noun{std::vector<int>}. 
+We see the performance of our adaptive sequence is pretty much the same 
+as the vector and list. That is because there 
+is no adaptation recorded and it is clearly that the default internal data structure \noun{std::vector<int>} is considered to have better performance under those random operations. However, the dequeue performs the worst probably because the operations involve many insertions
 and sorting.
 
 
